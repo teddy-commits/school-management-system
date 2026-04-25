@@ -1,4 +1,4 @@
-package com.admas.management.modules.commen.model;
+package com.admas.management.modules.shared.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

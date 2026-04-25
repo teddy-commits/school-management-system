@@ -1,6 +1,6 @@
 package com.admas.management.modules.registration.dto;
 
-import com.admas.management.modules.commen.model.Role;
+import com.admas.management.modules.shared.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +37,7 @@ public class UserResponse {
     // For dashboard
     private String permissions;
 
-    public static UserResponse fromUser(com.admas.management.modules.commen.model.User user) {
+    public static UserResponse fromUser(com.admas.management.modules.shared.model.User user) {
         return UserResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
@@ -60,7 +60,7 @@ public class UserResponse {
                 .build();
     }
 
-    private static String determineUserType(com.admas.management.modules.commen.model.User user) {
+    private static String determineUserType(com.admas.management.modules.shared.model.User user) {
         if (user.isStudent()) return "Student";
         if (user.isInstructor()) return "Instructor";
         if (user.isAcademicAdministrator()) return "Academic Administrator";

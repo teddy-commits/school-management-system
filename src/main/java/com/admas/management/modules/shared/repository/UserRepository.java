@@ -1,7 +1,7 @@
-package com.admas.management.modules.commen.repository;
+package com.admas.management.modules.shared.repository;
 
-import com.admas.management.modules.commen.model.User;
-import com.admas.management.modules.commen.model.Role;
+import com.admas.management.modules.shared.model.User;
+import com.admas.management.modules.shared.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,6 +29,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Status queries
     List<User> findByIsActive(Boolean isActive);
 
+    List<User> findByEnrollmentYear(Integer year);
+    List<User> findByFirstNameContainingOrLastNameContainingOrEmailContaining(String firstName, String lastName, String email);
     // Search queries
     @Query("SELECT u FROM User u WHERE LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<User> searchByName(@Param("name") String name);

@@ -1,6 +1,6 @@
 package com.admas.management.modules.registration.dto;
 
-import com.admas.management.modules.commen.model.Role;
+import com.admas.management.modules.shared.model.Role;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
