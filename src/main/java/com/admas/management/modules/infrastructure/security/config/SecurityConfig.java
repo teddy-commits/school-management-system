@@ -5,6 +5,7 @@ import com.admas.management.modules.infrastructure.security.service.CustomUserDe
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -48,21 +49,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors().and()
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeHttpRequests(authorize -> authorize
-                        // Explicitly allow registration endpoint
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/registration/students/register")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/auth/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/public/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/public/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/health")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/test/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/error")).permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        // Any other request needs authentication
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // REMOVE /api/v1 from these matchers
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers("/registration/students/register").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/error").permitAll() // Still highly recommended
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
@@ -70,4 +66,6 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+
 }

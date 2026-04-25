@@ -1,6 +1,5 @@
 package com.admas.management.modules.infrastructure.security.jwt;
 
-
 import com.admas.management.modules.infrastructure.security.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,7 +20,7 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthenticationFilter extends OncePerRequestFilter {  // Extend OncePerRequestFilter
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
@@ -30,6 +29,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {  // Extend O
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
+        String path = request.getRequestURI();
+
+        // Skip JWT authentication for public endpoints
+        if (shouldSkipAuthentication(path)) {
+            log.debug("Skipping JWT authentication for path: {}", path);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             String jwt = getJwtFromRequest(request);
 
@@ -42,12 +51,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {  // Extend O
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("Set authentication for user: {}", userIdentifier);
+            } else {
+                log.debug("No valid JWT token found for path: {}", path);
             }
         } catch (Exception ex) {
             log.error("Could not set user authentication in security context", ex);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean shouldSkipAuthentication(String path) {
+        // List of paths that don't need JWT authentication
+        return path.contains("/api/v1/auth/login") ||
+                path.contains("/api/v1/registration/students/register") ||
+                path.contains("/public/") ||
+                path.contains("/health") ||
+                path.contains("/test/") ||
+                path.equals("/error");
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {

@@ -14,7 +14,6 @@ public class SchoolManagementApplication {
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(SchoolManagementApplication.class, args);
 
-        // Check if controller is loaded
         try {
             Object controller = context.getBean(com.admas.management.modules.registration.controller.StudentRegistrationController.class);
             System.out.println("✅ Controller loaded: " + controller.getClass().getName());

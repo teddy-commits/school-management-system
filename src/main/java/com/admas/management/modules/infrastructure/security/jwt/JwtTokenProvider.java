@@ -15,14 +15,21 @@ import java.util.Date;
 @Slf4j
 public class JwtTokenProvider {
 
-    @Value("${app.jwt.secret:admasSecretKeyForSchoolManagementSystem2024VeryLongAndSecure}")
+    @Value("${app.jwt.secret:admasSecretKeyForSchoolManagementSystem2024ThatIsVeryLongAndSecureAndMustBeAtLeast512BitsWhichIs64CharactersLongKey123!}")
     private String jwtSecret;
 
     @Value("${app.jwt.expiration:86400000}")
     private int jwtExpiration;
 
     private Key key() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        // Ensure the key is at least 512 bits (64 bytes) for HS512
+        byte[] keyBytes = jwtSecret.getBytes();
+        if (keyBytes.length < 64) {
+            log.warn("JWT secret key is only {} bytes. For HS512, it should be at least 64 bytes. Generating secure key...", keyBytes.length);
+            // Generate a secure key if the provided one is too weak
+            return Keys.secretKeyFor(SignatureAlgorithm.HS512);
+        }
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(Authentication authentication) {
@@ -32,7 +39,7 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
 
         return Jwts.builder()
-                .setSubject(userPrincipal.getUsername())  // This will be the ID (studentId/employeeId)
+                .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(key(), SignatureAlgorithm.HS512)
