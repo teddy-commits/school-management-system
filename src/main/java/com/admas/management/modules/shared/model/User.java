@@ -2,6 +2,7 @@ package com.admas.management.modules.shared.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -20,6 +21,7 @@ import java.util.Set;
                 @UniqueConstraint(columnNames = "employeeId")
         })
 @Data
+@Builder  // ← ADD THIS LINE
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -48,10 +50,10 @@ public class User {
 
     // University Identification
     @Column(unique = true)
-    private String studentId;      // For students only
+    private String studentId;
 
     @Column(unique = true)
-    private String employeeId;     // For staff, faculty, admin
+    private String employeeId;
 
     // Role Information
     @Enumerated(EnumType.STRING)
@@ -60,7 +62,7 @@ public class User {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private Set<Role> additionalRoles = new HashSet<>();  // For multi-role users
+    private Set<Role> additionalRoles = new HashSet<>();
 
     // Academic Information (for students)
     private String department;
@@ -68,11 +70,11 @@ public class User {
     private Integer enrollmentYear;
     private Integer graduationYear;
     private String currentSemester;
-    private Double cgpa;  // Cumulative GPA
+    private Double cgpa;
 
     // Professional Information (for staff & faculty)
-    private String designation;      // Assistant Professor, Senior Lecturer, etc.
-    private String qualification;    // PhD, Masters, etc.
+    private String designation;
+    private String qualification;
     private LocalDateTime joiningDate;
     private Double salary;
 
@@ -89,15 +91,6 @@ public class User {
     private LocalDateTime updatedAt;
 
     private LocalDateTime lastLoginAt;
-
-    // Constructors for different user types
-    public User(String firstName, String lastName, String email, String password, Role role) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
 
     // Helper methods
     public String getFullName() {
