@@ -37,7 +37,7 @@ public class UserResponse {
     // For dashboard
     private String permissions;
 
-    public static UserResponse fromUser(com.admas.management.modules.registration.model.entity.User user) {
+    public static UserResponse fromUser(com.admas.management.modules.commen.model.User user) {
         return UserResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
@@ -60,7 +60,7 @@ public class UserResponse {
                 .build();
     }
 
-    private static String determineUserType(com.admas.management.modules.registration.model.entity.User user) {
+    private static String determineUserType(com.admas.management.modules.commen.model.User user) {
         if (user.isStudent()) return "Student";
         if (user.isInstructor()) return "Instructor";
         if (user.isAcademicAdministrator()) return "Academic Administrator";
