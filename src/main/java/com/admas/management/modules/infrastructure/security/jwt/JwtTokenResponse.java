@@ -1,4 +1,4 @@
-package com.admas.management.infrastructure.jwt;
+package com.admas.management.modules.infrastructure.security.jwt;
 
 public class JwtTokenResponse {
 }
