@@ -1,4 +1,4 @@
-package com.admas.management.modules.fee.dto.response;
+package com.admas.management.modules.finance.dto.response;
 
 public class PaymentResponseDTO {
 }

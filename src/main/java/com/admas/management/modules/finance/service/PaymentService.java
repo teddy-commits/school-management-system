@@ -1,4 +1,4 @@
-package com.admas.management.modules.fee.service;
+package com.admas.management.modules.finance.service;
 
 public class PaymentService {
 }

@@ -1,4 +1,4 @@
-package com.admas.management.modules.fee.repository;
+package com.admas.management.modules.finance.repository;
 
 public class InvoiceRepository {
 }

@@ -1,4 +1,4 @@
-package com.admas.management.modules.fee.dto.request;
+package com.admas.management.modules.finance.dto.request;
 
 public class FeeWaiverRequestDTO {
 }

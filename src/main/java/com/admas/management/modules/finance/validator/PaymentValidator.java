@@ -1,4 +1,4 @@
-package com.admas.management.modules.fee.validator;
+package com.admas.management.modules.finance.validator;
 
 public class PaymentValidator {
 }

@@ -25,6 +25,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByIsActive(Boolean isActive);
     List<User> findByEnrollmentYear(Integer year);
     List<User> findByFirstNameContainingOrLastNameContainingOrEmailContaining(String firstName, String lastName, String email);
+    // Add these methods
+    @Query("SELECT u FROM User u WHERE u.role = :role AND (u.firstName LIKE %:keyword% OR u.lastName LIKE %:keyword% OR u.email LIKE %:keyword%)")
+    List<User> findByRoleAndKeyword(@Param("role") Role role, @Param("keyword") String keyword);
 
     @Query("SELECT u FROM User u WHERE LOWER(u.firstName) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<User> searchByName(@Param("name") String name);

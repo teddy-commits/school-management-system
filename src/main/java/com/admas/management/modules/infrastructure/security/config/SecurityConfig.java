@@ -53,12 +53,15 @@ public class SecurityConfig {
                 .cors(cors -> cors.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // REMOVE /api/v1 from these matchers
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers("/registration/students/register").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/debug/admin-check").permitAll()
+                        .requestMatchers("/debug/test-password").permitAll()
+                        .requestMatchers("/debug/generate-hash").permitAll()
                         .requestMatchers("/error").permitAll() // Still highly recommended
+
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

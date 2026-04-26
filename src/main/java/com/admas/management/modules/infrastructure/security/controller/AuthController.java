@@ -7,6 +7,7 @@ import com.admas.management.modules.shared.model.User;
 import com.admas.management.modules.shared.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Slf4j
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -26,19 +28,23 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        // Authenticate using the ID (studentId or employeeId)
+        log.info("Login attempt with ID: {}", loginRequest.getId());
+
+        // First find the user to get their email for authentication
+        User user = findUserByIdOrEmail(loginRequest.getId());
+
+        log.info("User found: {} with role: {}", user.getEmail(), user.getRole());
+
+        // Authenticate using email (not the ID)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getId(),  // Now using ID (studentId or employeeId)
+                        user.getEmail(),  // Use email for Spring Security authentication
                         loginRequest.getPassword()
                 )
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
-
-        // Find user by ID (studentId or employeeId)
-        User user = findUserById(loginRequest.getId());
 
         String userType = determineUserType(user);
         String loginId = user.getStudentId() != null ? user.getStudentId() : user.getEmployeeId();
@@ -51,7 +57,7 @@ public class AuthController {
                 .email(user.getEmail())
                 .studentId(user.getStudentId())
                 .employeeId(user.getEmployeeId())
-                .loginId(loginId)
+                .loginId(loginId != null ? loginId : user.getEmail())
                 .role(user.getRole())
                 .additionalRoles(user.getAdditionalRoles())
                 .userType(userType)
@@ -68,8 +74,9 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<LoginResponse> getCurrentUser(Authentication authentication) {
-        String loginId = authentication.getName();
-        User user = findUserById(loginId);
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
         String userType = determineUserType(user);
         String userLoginId = user.getStudentId() != null ? user.getStudentId() : user.getEmployeeId();
@@ -90,11 +97,18 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    private User findUserById(String id) {
-        // Try to find by Student ID first, then Employee ID
-        return userRepository.findByStudentId(id)
-                .orElseGet(() -> userRepository.findByEmployeeId(id)
-                        .orElseThrow(() -> new RuntimeException("User not found with ID: " + id)));
+    // Updated method to check email FIRST
+    private User findUserByIdOrEmail(String id) {
+        log.info("Looking for user with identifier: {}", id);
+
+        // Try to find by email FIRST (important for admin)
+        return userRepository.findByEmail(id)
+                .orElseGet(() -> userRepository.findByStudentId(id)
+                        .orElseGet(() -> userRepository.findByEmployeeId(id)
+                                .orElseThrow(() -> {
+                                    log.error("User not found with identifier: {}", id);
+                                    return new RuntimeException("User not found with ID: " + id);
+                                })));
     }
 
     private String determineUserType(User user) {

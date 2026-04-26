@@ -1,4 +1,4 @@
-package com.admas.management.modules.fee.controller;
+package com.admas.management.modules.finance.controller;
 
 public class PaymentController {
 }

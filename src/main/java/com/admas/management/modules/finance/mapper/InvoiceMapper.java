@@ -1,4 +1,4 @@
-package com.admas.management.modules.fee.mapper;
+package com.admas.management.modules.finance.mapper;
 
 public class InvoiceMapper {
 }

@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Try to find by Student ID first, then Employee ID, then Email
+        
         User user = userRepository.findByStudentId(username)
                 .orElseGet(() -> userRepository.findByEmployeeId(username)
                         .orElseGet(() -> userRepository.findByEmail(username)
