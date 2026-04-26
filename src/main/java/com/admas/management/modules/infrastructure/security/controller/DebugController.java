@@ -25,7 +25,6 @@ public class DebugController {
     public ResponseEntity<Map<String, Object>> checkAdmin() {
         Map<String, Object> result = new HashMap<>();
 
-        // Check by email
         User byEmail = userRepository.findByEmail("admin@university.com").orElse(null);
 
         Map<String, Object> adminByEmail = new HashMap<>();
@@ -41,7 +40,6 @@ public class DebugController {
         }
         result.put("adminByEmail", adminByEmail);
 
-        // Check by employee ID
         User byEmployeeId = userRepository.findByEmployeeId("ADMIN001").orElse(null);
         Map<String, Object> adminByEmployeeId = new HashMap<>();
         if (byEmployeeId != null) {
@@ -54,7 +52,6 @@ public class DebugController {
         }
         result.put("adminByEmployeeId", adminByEmployeeId);
 
-        // Get all users safely
         List<User> allUsers = userRepository.findAll();
         result.put("totalUsers", allUsers.size());
 
@@ -116,13 +113,10 @@ public class DebugController {
         Map<String, String> result = new HashMap<>();
 
         try {
-            // Check if admin already exists
             if (userRepository.findByEmail("admin@university.com").isPresent()) {
                 result.put("error", "Admin already exists!");
                 return ResponseEntity.ok(result);
             }
-
-            // Create new admin
             User admin = new User();
             admin.setFirstName("System");
             admin.setLastName("Administrator");
@@ -153,11 +147,9 @@ public class DebugController {
     public ResponseEntity<Map<String, Object>> checkAuthentication() {
         Map<String, Object> result = new HashMap<>();
 
-        // Check if any admin exists
         long adminCount = userRepository.countByRole(Role.ADMIN);
         result.put("adminCount", adminCount);
 
-        // Get all roles
         Map<String, Long> roleCounts = new HashMap<>();
         for (Role role : Role.values()) {
             long count = userRepository.countByRole(role);
@@ -167,7 +159,6 @@ public class DebugController {
         }
         result.put("userCountsByRole", roleCounts);
 
-        // Check database connection
         try {
             long totalUsers = userRepository.count();
             result.put("databaseConnected", true);

@@ -1,8 +1,8 @@
 package com.admas.management.modules.finance.controller;
 
+import com.admas.management.modules.finance.dto.response.FeeResponseDTO;
+import com.admas.management.modules.finance.dto.response.FeeSummaryDTO;
 import com.admas.management.modules.finance.model.dto.request.FeeStructureRequestDTO;
-import com.admas.management.modules.finance.model.dto.response.FeeResponseDTO;
-import com.admas.management.modules.finance.model.dto.response.FeeSummaryDTO;
 import com.admas.management.modules.finance.service.FeeService;
 import com.admas.management.modules.infrastructure.security.service.SecurityService;
 import jakarta.validation.Valid;

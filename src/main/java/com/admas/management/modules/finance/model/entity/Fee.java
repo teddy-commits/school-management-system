@@ -53,6 +53,12 @@ public class Fee {
 
     private String invoiceNumber;
 
+    @Column(length = 500)
+    private String remarks;  // Add this field for remarks/notes
+
+    @Column(length = 500)
+    private String waiverReason;  // Add this for waiver reason
+
     @CreatedDate
     private LocalDateTime createdAt;
 
