@@ -20,12 +20,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
 
-    // Create Instructor (Admin only)
     @PostMapping("/instructors")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserRegistrationResponse> createInstructor(
@@ -35,7 +33,6 @@ public class AdminUserController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Create Academic Administrator (Admin only)
     @PostMapping("/academic-administrators")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserRegistrationResponse> createAcademicAdministrator(
@@ -45,7 +42,6 @@ public class AdminUserController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Create Management Staff (Admin only)
     @PostMapping("/management")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserRegistrationResponse> createManagementStaff(
@@ -55,7 +51,6 @@ public class AdminUserController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Create Admin (Super Admin only)
     @PostMapping("/admins")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<UserRegistrationResponse> createAdmin(
@@ -65,7 +60,6 @@ public class AdminUserController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Get all instructors
     @GetMapping("/instructors")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<List<UserProfileResponse>> getAllInstructors() {
@@ -73,7 +67,6 @@ public class AdminUserController {
         return ResponseEntity.ok(instructors);
     }
 
-    // Get all academic administrators
     @GetMapping("/academic-administrators")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<List<UserProfileResponse>> getAllAcademicAdministrators() {
@@ -81,7 +74,6 @@ public class AdminUserController {
         return ResponseEntity.ok(admins);
     }
 
-    // Get all management staff
     @GetMapping("/management")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<List<UserProfileResponse>> getAllManagementStaff() {
@@ -89,7 +81,6 @@ public class AdminUserController {
         return ResponseEntity.ok(staff);
     }
 
-    // Get all admins (Super Admin only)
     @GetMapping("/admins")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<List<UserProfileResponse>> getAllAdmins() {
@@ -97,7 +88,6 @@ public class AdminUserController {
         return ResponseEntity.ok(admins);
     }
 
-    // Get user by ID
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserProfileResponse> getUserById(@PathVariable Long id) {
@@ -105,7 +95,6 @@ public class AdminUserController {
         return ResponseEntity.ok(response);
     }
 
-    // Update user
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserProfileResponse> updateUser(
@@ -114,7 +103,6 @@ public class AdminUserController {
         UserProfileResponse response = adminUserService.updateUser(id, request);
         return ResponseEntity.ok(response);
     }
-    // Deactivate user
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<Map<String, String>> deactivateUser(@PathVariable Long id) {
@@ -124,7 +112,6 @@ public class AdminUserController {
         return ResponseEntity.ok(response);
     }
 
-    // Activate user
     @PatchMapping("/{id}/activate")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<Map<String, String>> activateUser(@PathVariable Long id) {

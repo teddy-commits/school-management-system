@@ -18,7 +18,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174"
+}, allowCredentials = "true")
+
 @Slf4j
 public class AuthController {
 
@@ -28,17 +33,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        log.info("Login attempt with ID: {}", loginRequest.getId());
-
-        // First find the user to get their email for authentication
         User user = findUserByIdOrEmail(loginRequest.getId());
-
-        log.info("User found: {} with role: {}", user.getEmail(), user.getRole());
-
-        // Authenticate using email (not the ID)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),  // Use email for Spring Security authentication
+                        user.getEmail(),
                         loginRequest.getPassword()
                 )
         );

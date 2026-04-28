@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,9 +72,12 @@ public class FeeServiceImpl implements FeeService {
         FeeStructure feeStructure = feeStructureRepository.findById(feeStructureId)
                 .orElseThrow(() -> new RuntimeException("Fee structure not found"));
 
-        // Check if fee already exists for this student
+        // FIXED: Pass FeeType enum, not String
         boolean exists = feeRepository.existsByStudentAndFeeTypeAndSemester(
-                student, feeStructure.getFeeType().name(), semester);
+                student,
+                feeStructure.getFeeType(),  // This is FeeType enum
+                semester
+        );
 
         if (exists) {
             throw new RuntimeException("Fee already generated for this student and semester");
@@ -198,7 +202,19 @@ public class FeeServiceImpl implements FeeService {
     }
 
     // Additional methods implementation...
-    @Override public List<FeeResponseDTO> getAllFeeStructures() { return null; }
+    @Override
+    public List<FeeResponseDTO> getAllFeeStructures() {
+        List<FeeStructure> feeStructures = feeStructureRepository.findAll();
+
+        // Return empty list instead of null or empty string
+        if (feeStructures == null || feeStructures.isEmpty()) {
+            return new ArrayList<>();  // Return empty ArrayList, not null
+        }
+
+        return feeStructures.stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
     @Override public FeeResponseDTO updateFeeStructure(Long id, FeeStructureRequestDTO request) { return null; }
     @Override public void deleteFeeStructure(Long id) {}
     @Override public List<FeeResponseDTO> generateAllFeesForSemester(String semester, Integer academicYear) { return null; }

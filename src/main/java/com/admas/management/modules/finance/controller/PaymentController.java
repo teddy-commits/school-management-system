@@ -17,13 +17,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/finance")
+@RequestMapping("/finance")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -112,8 +112,10 @@ public class PaymentController {
     @GetMapping("/reports/daily")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FinancialReportDTO> generateDailyReport(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
-        return ResponseEntity.ok(paymentService.generateDailyReport(date));
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        // Convert LocalDate to LocalDateTime at start of day
+        LocalDateTime startOfDay = date.atStartOfDay();
+        return ResponseEntity.ok(paymentService.generateDailyReport(startOfDay));
     }
 
     // Monthly Financial Report

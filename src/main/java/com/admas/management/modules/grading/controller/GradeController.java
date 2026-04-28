@@ -18,7 +18,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/grading")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class GradeController {
 
     private final GradeService gradeService;
@@ -46,7 +45,6 @@ public class GradeController {
     @GetMapping("/students/{studentId}/grades")
     @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<List<GradeResponseDTO>> getStudentGrades(@PathVariable Long studentId) {
-        // Students can only view their own grades
         if (!securityService.isStudentOwner(studentId)) {
             throw new RuntimeException("Access denied");
         }
@@ -56,7 +54,11 @@ public class GradeController {
 
     @GetMapping("/courses/{courseCode}/grades")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'PROFESSOR', 'ADMIN')")
-    public ResponseEntity<List<GradeResponseDTO>> getCourseGrades(@PathVariable String courseCode) {
+    public ResponseEntity<?> getCourseGrades(@PathVariable String courseCode) {
+        if ("ALL".equalsIgnoreCase(courseCode)) {
+            return ResponseEntity.ok(List.of());
+        }
+
         List<GradeResponseDTO> grades = gradeService.getCourseGrades(courseCode);
         return ResponseEntity.ok(grades);
     }

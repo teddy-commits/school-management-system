@@ -14,9 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/grading/enrollments")
+@RequestMapping("/grading/enrollments")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
@@ -25,7 +24,6 @@ public class EnrollmentController {
     @PostMapping
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<EnrollmentResponseDTO> enrollStudent(@Valid @RequestBody EnrollmentRequestDTO requestDTO) {
-        // Students can only enroll themselves
         if (!securityService.isStudentOwner(requestDTO.getStudentId())) {
             throw new RuntimeException("Access denied");
         }

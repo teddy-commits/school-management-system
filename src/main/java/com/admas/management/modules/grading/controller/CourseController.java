@@ -14,9 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/grading/courses")
+@RequestMapping("/grading/courses")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CourseController {
 
     private final CourseService courseService;

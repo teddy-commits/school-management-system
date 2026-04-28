@@ -1,6 +1,7 @@
 package com.admas.management.modules.finance.repository;
 
 import com.admas.management.modules.finance.model.entity.Fee;
+import com.admas.management.modules.finance.model.enums.FeeType;
 import com.admas.management.modules.finance.model.enums.PaymentStatus;
 import com.admas.management.modules.shared.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,5 +29,5 @@ public interface FeeRepository extends JpaRepository<Fee, Long> {
     @Query("SELECT f FROM Fee f WHERE f.status = 'PENDING' OR f.status = 'PARTIAL'")
     List<Fee> findUnpaidFees();
 
-    boolean existsByStudentAndFeeTypeAndSemester(User student, String feeType, String semester);
+    boolean existsByStudentAndFeeTypeAndSemester(User student, FeeType feeType, String semester);
 }

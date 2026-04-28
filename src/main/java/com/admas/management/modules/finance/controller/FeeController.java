@@ -15,15 +15,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/finance")
+@RequestMapping("/finance")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class FeeController {
 
     private final FeeService feeService;
     private final SecurityService securityService;
 
-    // Fee Structure Management (Admin/Finance only)
     @PostMapping("/fee-structures")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FeeResponseDTO> createFeeStructure(@Valid @RequestBody FeeStructureRequestDTO request) {
@@ -37,7 +35,6 @@ public class FeeController {
         return ResponseEntity.ok(feeService.getAllFeeStructures());
     }
 
-    // Generate Fee for Student
     @PostMapping("/students/{studentId}/fees")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FeeResponseDTO> generateStudentFee(
@@ -49,7 +46,6 @@ public class FeeController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Get Student Fees
     @GetMapping("/students/{studentId}/fees")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<List<FeeResponseDTO>> getStudentFees(@PathVariable Long studentId) {
@@ -59,7 +55,6 @@ public class FeeController {
         return ResponseEntity.ok(feeService.getStudentFees(studentId));
     }
 
-    // Get Student Fee Summary
     @GetMapping("/students/{studentId}/summary")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FeeSummaryDTO> getStudentFeeSummary(@PathVariable Long studentId) {
@@ -69,21 +64,18 @@ public class FeeController {
         return ResponseEntity.ok(feeService.getStudentFeeSummary(studentId));
     }
 
-    // Get Overdue Fees
     @GetMapping("/fees/overdue")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<List<FeeResponseDTO>> getOverdueFees() {
         return ResponseEntity.ok(feeService.getOverdueFees());
     }
 
-    // Apply Late Fee
     @PostMapping("/fees/{feeId}/apply-late-fee")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FeeResponseDTO> applyLateFee(@PathVariable Long feeId) {
         return ResponseEntity.ok(feeService.applyLateFee(feeId));
     }
 
-    // Waive Fee
     @PostMapping("/fees/{feeId}/waive")
     @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE_MANAGER')")
     public ResponseEntity<FeeResponseDTO> waiveFee(
