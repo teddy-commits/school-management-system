@@ -4,6 +4,7 @@ import com.admas.management.modules.registration.dto.request.StudentRegistration
 import com.admas.management.modules.registration.dto.request.StudentUpdateRequest;
 import com.admas.management.modules.registration.dto.response.StudentProfileResponse;
 import com.admas.management.modules.registration.dto.response.StudentRegistrationResponse;
+import com.admas.management.modules.registration.service.RegistrationSessionService;
 import com.admas.management.modules.registration.service.StudentRegistrationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +22,66 @@ import java.util.Map;
 public class StudentRegistrationController {
 
     private final StudentRegistrationService studentService;
+    private final RegistrationSessionService sessionService;
 
-    // Register a new student
+    // Register a new student (Only open during registration period)
     @PostMapping("/register")
-    public ResponseEntity<StudentRegistrationResponse> registerStudent(
-            @Valid @RequestBody StudentRegistrationRequest request) {
+    public ResponseEntity<?> registerStudent(@Valid @RequestBody StudentRegistrationRequest request) {
+        // Check if registration is open
+        if (!sessionService.isRegistrationOpen()) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Registration is currently CLOSED");
+            error.put("message", "Student registration is only available during open registration periods");
+            error.put("status", "CLOSED");
+            error.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+        }
+
+        // Get current session info for response
+        var currentSession = sessionService.getCurrentOpenSession();
+
         StudentRegistrationResponse response = studentService.registerStudent(request);
+
+        // Add session info to response if needed
+        Map<String, Object> successResponse = new HashMap<>();
+        successResponse.put("registration", response);
+        successResponse.put("session", Map.of(
+                "semester", currentSession.getSemester(),
+                "academicYear", currentSession.getAcademicYear(),
+                "endDate", currentSession.getEndDate()
+        ));
+
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    // Get registration status (Public endpoint)
+    @GetMapping("/status")
+    public ResponseEntity<Map<String, Object>> getRegistrationStatus() {
+        boolean isOpen = sessionService.isRegistrationOpen();
+        Map<String, Object> response = new HashMap<>();
+        response.put("isOpen", isOpen);
+
+        if (isOpen) {
+            var session = sessionService.getCurrentOpenSession();
+            response.put("semester", session.getSemester());
+            response.put("academicYear", session.getAcademicYear());
+            response.put("startDate", session.getStartDate());
+            response.put("endDate", session.getEndDate());
+            response.put("message", "Registration is currently OPEN");
+        } else {
+            response.put("message", "Registration is currently CLOSED");
+
+            // Get upcoming session if exists
+            var upcomingSessions = sessionService.getUpcomingSessions();
+            if (!upcomingSessions.isEmpty()) {
+                var nextSession = upcomingSessions.get(0);
+                response.put("nextRegistrationStart", nextSession.getStartDate());
+                response.put("nextSemester", nextSession.getSemester());
+                response.put("nextAcademicYear", nextSession.getAcademicYear());
+            }
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     // Get student by ID
