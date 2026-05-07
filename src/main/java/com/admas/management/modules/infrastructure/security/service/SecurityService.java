@@ -14,12 +14,10 @@ public class SecurityService {
 
     public boolean isStudentOwner(Long studentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserId = authentication.getName(); // This is now studentId or employeeId
+        String currentUserId = authentication.getName();
 
         User currentUser = findUserById(currentUserId);
         if (currentUser == null) return false;
-
-        // Check if the user is the student themselves or admin
         return currentUser.getId().equals(studentId) || currentUser.isAdmin();
     }
 

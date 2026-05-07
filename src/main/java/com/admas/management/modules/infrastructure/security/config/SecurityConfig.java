@@ -53,8 +53,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // IMPORTANT: Use allowedOriginPatterns instead of allowedOrigins
         configuration.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:5173",
@@ -81,15 +79,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - allow access without authentication
                         .requestMatchers(
-                                "/auth/login",           // POST /auth/login
-                                "/auth/logout",          // POST /auth/logout
-                                "/api/v1/auth/login",    // POST /api/v1/auth/login (if your controller uses this)
-                                "/api/v1/auth/logout",   // POST /api/v1/auth/logout
-                                "/api/v1/auth/**",       // All auth endpoints
-                                "/registration/students/register",  // Student registration
-                                "/error"                 // Error endpoint
+                                "/auth/login",
+                                "/auth/logout",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/logout",
+                                "/api/v1/auth/**",
+                                "/registration/students/register",
+                                "/error"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

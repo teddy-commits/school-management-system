@@ -31,8 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
-
-        // Skip JWT authentication for public endpoints
         if (shouldSkipAuthentication(path)) {
             log.debug("Skipping JWT authentication for path: {}", path);
             filterChain.doFilter(request, response);
@@ -63,7 +61,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean shouldSkipAuthentication(String path) {
-        // List of paths that don't need JWT authentication
         return path.contains("/api/v1/auth/login") ||
                 path.contains("/api/v1/registration/students/register") ||
                 path.contains("/public/") ||

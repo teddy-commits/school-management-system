@@ -48,7 +48,7 @@ public class Payment {
     private String mobileNumber;
 
     private String receiptNumber;
-    private String receivedBy; // Admin or cashier name
+    private String receivedBy;
     private String remarks;
 
     private LocalDateTime paymentDate;

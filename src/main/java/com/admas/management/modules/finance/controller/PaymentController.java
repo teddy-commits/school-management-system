@@ -33,7 +33,6 @@ public class PaymentController {
     @PostMapping("/payments")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<?> processPayment(@Valid @RequestBody PaymentRequestDTO request, Authentication authentication) {
-        // Validate
         List<String> errors = paymentValidator.validatePaymentRequest(request);
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);

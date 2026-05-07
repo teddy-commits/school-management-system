@@ -24,10 +24,8 @@ public class StudentRegistrationController {
     private final StudentRegistrationService studentService;
     private final RegistrationSessionService sessionService;
 
-    // Register a new student (Only open during registration period)
     @PostMapping("/register")
     public ResponseEntity<?> registerStudent(@Valid @RequestBody StudentRegistrationRequest request) {
-        // Check if registration is open
         if (!sessionService.isRegistrationOpen()) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Registration is currently CLOSED");
@@ -36,13 +34,9 @@ public class StudentRegistrationController {
             error.put("timestamp", System.currentTimeMillis());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
         }
-
-        // Get current session info for response
         var currentSession = sessionService.getCurrentOpenSession();
 
         StudentRegistrationResponse response = studentService.registerStudent(request);
-
-        // Add session info to response if needed
         Map<String, Object> successResponse = new HashMap<>();
         successResponse.put("registration", response);
         successResponse.put("session", Map.of(
@@ -53,9 +47,7 @@ public class StudentRegistrationController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
-    // Get registration status (Public endpoint)
-    @GetMapping("/status")
+   @GetMapping("/status")
     public ResponseEntity<Map<String, Object>> getRegistrationStatus() {
         boolean isOpen = sessionService.isRegistrationOpen();
         Map<String, Object> response = new HashMap<>();
@@ -70,8 +62,6 @@ public class StudentRegistrationController {
             response.put("message", "Registration is currently OPEN");
         } else {
             response.put("message", "Registration is currently CLOSED");
-
-            // Get upcoming session if exists
             var upcomingSessions = sessionService.getUpcomingSessions();
             if (!upcomingSessions.isEmpty()) {
                 var nextSession = upcomingSessions.get(0);
@@ -83,57 +73,46 @@ public class StudentRegistrationController {
 
         return ResponseEntity.ok(response);
     }
-
-    // Get student by ID
     @GetMapping("/{id}")
     public ResponseEntity<StudentProfileResponse> getStudentById(@PathVariable Long id) {
         StudentProfileResponse response = studentService.getStudentById(id);
         return ResponseEntity.ok(response);
     }
-
-    // Get student by Student ID (STU20240001)
     @GetMapping("/student-id/{studentId}")
     public ResponseEntity<StudentProfileResponse> getStudentByStudentId(@PathVariable String studentId) {
         StudentProfileResponse response = studentService.getStudentByStudentId(studentId);
         return ResponseEntity.ok(response);
     }
 
-    // Get student by email
     @GetMapping("/email/{email}")
     public ResponseEntity<StudentProfileResponse> getStudentByEmail(@PathVariable String email) {
         StudentProfileResponse response = studentService.getStudentByEmail(email);
         return ResponseEntity.ok(response);
     }
-
-    // Get all students
     @GetMapping
     public ResponseEntity<List<StudentProfileResponse>> getAllStudents() {
         List<StudentProfileResponse> students = studentService.getAllStudents();
         return ResponseEntity.ok(students);
     }
 
-    // Get students by department
     @GetMapping("/department/{department}")
     public ResponseEntity<List<StudentProfileResponse>> getStudentsByDepartment(@PathVariable String department) {
         List<StudentProfileResponse> students = studentService.getStudentsByDepartment(department);
         return ResponseEntity.ok(students);
     }
 
-    // Get students by faculty
     @GetMapping("/faculty/{faculty}")
     public ResponseEntity<List<StudentProfileResponse>> getStudentsByFaculty(@PathVariable String faculty) {
         List<StudentProfileResponse> students = studentService.getStudentsByFaculty(faculty);
         return ResponseEntity.ok(students);
     }
 
-    // Get students by enrollment year
     @GetMapping("/year/{year}")
     public ResponseEntity<List<StudentProfileResponse>> getStudentsByEnrollmentYear(@PathVariable Integer year) {
         List<StudentProfileResponse> students = studentService.getStudentsByEnrollmentYear(year);
         return ResponseEntity.ok(students);
     }
 
-    // Update student
     @PutMapping("/{id}")
     public ResponseEntity<StudentProfileResponse> updateStudent(
             @PathVariable Long id,
@@ -142,7 +121,6 @@ public class StudentRegistrationController {
         return ResponseEntity.ok(response);
     }
 
-    // Deactivate student
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<Map<String, String>> deactivateStudent(@PathVariable Long id) {
         studentService.deactivateStudent(id);
@@ -151,7 +129,6 @@ public class StudentRegistrationController {
         return ResponseEntity.ok(response);
     }
 
-    // Activate student
     @PatchMapping("/{id}/activate")
     public ResponseEntity<Map<String, String>> activateStudent(@PathVariable Long id) {
         studentService.activateStudent(id);
@@ -160,7 +137,6 @@ public class StudentRegistrationController {
         return ResponseEntity.ok(response);
     }
 
-    // Get total student count
     @GetMapping("/count")
     public ResponseEntity<Map<String, Long>> getTotalStudentCount() {
         long count = studentService.getTotalStudentCount();
@@ -169,7 +145,6 @@ public class StudentRegistrationController {
         return ResponseEntity.ok(response);
     }
 
-    // Search students
     @GetMapping("/search")
     public ResponseEntity<List<StudentProfileResponse>> searchStudents(@RequestParam String keyword) {
         List<StudentProfileResponse> students = studentService.searchStudents(keyword);

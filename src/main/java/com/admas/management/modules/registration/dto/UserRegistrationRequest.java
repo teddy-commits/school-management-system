@@ -34,18 +34,12 @@ public class UserRegistrationRequest {
 
     @NotBlank(message = "Role is required")
     private Role role;
-
-    // Student-specific fields
     private String department;
     private String faculty;
     private Integer enrollmentYear;
-
-    // Instructor/Staff-specific fields
     private String designation;
     private String qualification;
     private LocalDateTime joiningDate;
-
-    // Common fields
     private String phoneNumber;
     private String address;
 }

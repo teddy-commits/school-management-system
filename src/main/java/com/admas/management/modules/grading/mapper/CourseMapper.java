@@ -33,8 +33,6 @@ public class CourseMapper {
         course.setSyllabus(dto.getSyllabus());
         course.setRoom(dto.getRoom());
         course.setSchedule(dto.getSchedule());
-
-        // Set instructor name if email exists
         if (dto.getInstructorEmail() != null) {
             userRepository.findByEmail(dto.getInstructorEmail()).ifPresent(instructor ->
                     course.setInstructorName(instructor.getFullName())

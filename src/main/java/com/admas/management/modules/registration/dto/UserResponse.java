@@ -27,14 +27,12 @@ public class UserResponse {
     private String phoneNumber;
     private Boolean isActive;
     private LocalDateTime createdAt;
-    private String userType;  // "Student", "Instructor", "Administrator", etc.
+    private String userType;
 
-    // For students
     private Integer enrollmentYear;
     private Double cgpa;
     private String currentSemester;
 
-    // For dashboard
     private String permissions;
 
     public static UserResponse fromUser(com.admas.management.modules.shared.model.User user) {

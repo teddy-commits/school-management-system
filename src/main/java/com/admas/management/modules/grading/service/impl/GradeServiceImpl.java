@@ -43,14 +43,10 @@ public class GradeServiceImpl implements GradeService {
 
         Course course = courseRepository.findByCourseCode(dto.getCourseCode())
                 .orElseThrow(() -> new RuntimeException("Course not found"));
-
-        // Verify instructor teaches this course
         if (!course.getInstructorEmail().equals(instructorEmail) &&
                 !instructorEmail.equals("admin@university.com")) {
             throw new RuntimeException("You are not authorized to grade this course");
         }
-
-        // Check if grade already exists
         Grade grade = gradeRepository.findByStudentAndCourse(student, course)
                 .orElse(new Grade());
 
@@ -65,8 +61,6 @@ public class GradeServiceImpl implements GradeService {
         grade.calculateGrade();
 
         Grade savedGrade = gradeRepository.save(grade);
-
-        // Update student's CGPA
         Double newCGPA = gpaCalculatorService.calculateStudentCGPA(student.getId());
         student.setCgpa(newCGPA);
         userRepository.save(student);

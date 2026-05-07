@@ -24,7 +24,6 @@ public class AdminUserMapper {
         user.setAddress(request.getAddress());
         user.setRole(request.getRole());
 
-        // Set role-specific fields
         switch (request.getRole()) {
             case INSTRUCTOR:
             case SENIOR_INSTRUCTOR:

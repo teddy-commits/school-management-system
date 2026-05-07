@@ -94,12 +94,7 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
-
-    // Updated method to check email FIRST
     private User findUserByIdOrEmail(String id) {
-        log.info("Looking for user with identifier: {}", id);
-
-        // Try to find by email FIRST (important for admin)
         return userRepository.findByEmail(id)
                 .orElseGet(() -> userRepository.findByStudentId(id)
                         .orElseGet(() -> userRepository.findByEmployeeId(id)

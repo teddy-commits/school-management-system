@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AdminUserUpdateRequest {
 
-    // Optional fields for update (no @NotBlank validation)
     private String firstName;
     private String lastName;
 
@@ -25,8 +24,6 @@ public class AdminUserUpdateRequest {
     private String phoneNumber;
     private String address;
     private Role role;
-
-    // For Instructors and Academic Administrators
     private String designation;
     private String qualification;
     private String department;
@@ -35,15 +32,9 @@ public class AdminUserUpdateRequest {
     private Double salary;
     private String specialization;
     private String officeLocation;
-
-    // For Management Staff
     private String position;
     private String division;
-
-    // For Admin
     private String adminLevel;
     private String permissions;
-
-    // Status
     private Boolean isActive;
 }

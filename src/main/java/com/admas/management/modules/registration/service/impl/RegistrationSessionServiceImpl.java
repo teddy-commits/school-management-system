@@ -27,13 +27,10 @@ public class RegistrationSessionServiceImpl implements RegistrationSessionServic
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public RegistrationSessionResponseDTO createSession(RegistrationSessionRequestDTO request) {
         log.info("Creating registration session for {} {}", request.getSemester(), request.getAcademicYear());
-
-        // Check if session already exists
         if (sessionRepository.existsBySemesterAndAcademicYear(request.getSemester(), request.getAcademicYear())) {
             throw new RuntimeException("Registration session already exists for this semester and year");
         }
 
-        // Validate dates
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new RuntimeException("End date must be after start date");
         }

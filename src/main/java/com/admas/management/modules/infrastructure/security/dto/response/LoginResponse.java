@@ -21,7 +21,7 @@ public class LoginResponse {
     private String email;
     private String studentId;
     private String employeeId;
-    private String loginId;  // The ID used for login (studentId or employeeId)
+    private String loginId;
     private Role role;
     private Set<Role> additionalRoles;
     private String userType;

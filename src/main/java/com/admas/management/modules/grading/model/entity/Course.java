@@ -57,11 +57,11 @@ public class Course {
     private Integer maxStudents;
     private Integer enrolledStudents = 0;
 
-    private String prerequisites; // Comma-separated course codes
+    private String prerequisites;
     private String syllabus;
 
     private String room;
-    private String schedule; // e.g., "Monday 10:00-12:00"
+    private String schedule;
 
     @CreatedDate
     private LocalDateTime createdAt;

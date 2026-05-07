@@ -38,8 +38,6 @@ public class GPACalculatorService {
 
     public TranscriptResponseDTO generateTranscript(User student) {
         List<Grade> grades = gradeRepository.findByStudent(student);
-
-        // Group grades by semester
         Map<String, List<Grade>> gradesBySemester = grades.stream()
                 .collect(Collectors.groupingBy(g -> g.getAcademicYear() + "-" + g.getSemester()));
 

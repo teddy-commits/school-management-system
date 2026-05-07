@@ -18,13 +18,13 @@ public class StudentMapper {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword()); // Will be encoded in service
+        user.setPassword(request.getPassword());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setAddress(request.getAddress());
         user.setDepartment(request.getDepartment());
         user.setFaculty(request.getFaculty());
         user.setEnrollmentYear(request.getEnrollmentYear());
-        user.setStudentType(request.getStudentType());  // Add student type
+        user.setStudentType(request.getStudentType());
         user.setRole(Role.STUDENT);
         user.setIsActive(true);
         user.setCgpa(0.0);
@@ -72,7 +72,6 @@ public class StudentMapper {
     }
 
     private Integer calculateTotalCredits(User user) {
-        // This will be implemented when grading module is ready
         return 0;
     }
 

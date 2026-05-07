@@ -41,7 +41,6 @@ public class EnrollmentController {
     @GetMapping("/students/{studentId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<List<EnrollmentResponseDTO>> getStudentEnrollments(@PathVariable Long studentId) {
-        // Students can only view their own enrollments
         if (!securityService.isStudentOwner(studentId)) {
             throw new RuntimeException("Access denied");
         }

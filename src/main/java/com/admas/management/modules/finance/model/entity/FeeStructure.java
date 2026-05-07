@@ -36,15 +36,15 @@ public class FeeStructure {
 
     private Double amount;
 
-    private String department; // Specific department or "ALL"
-    private String faculty; // Specific faculty or "ALL"
-    private String program; // Specific program or "ALL"
+    private String department;
+    private String faculty;
+    private String program;
 
     private Boolean isActive = true;
     private Boolean isMandatory = true;
 
     private Integer academicYear;
-    private String semester; // FALL, SPRING, SUMMER, or "ALL"
+    private String semester;
 
     private LocalDateTime dueDate;
     private Integer gracePeriodDays = 15;

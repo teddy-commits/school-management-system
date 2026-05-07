@@ -15,24 +15,14 @@ import java.time.LocalDateTime;
 public class UserRegistrationResponse {
 
     private Long id;
-
-    private String userId;  // studentId or employeeId
-
+    private String userId;
     private String fullName;
-
     private String email;
-
     private Role role;
-
-    private String userType;  // STUDENT, INSTRUCTOR, ACADEMIC_ADMINISTRATOR, MANAGEMENT, ADMIN
-
+    private String userType;
     private String department;
-
     private String designation;
-
-    private String registrationStatus;  // SUCCESS, FAILED, PENDING
-
+    private String registrationStatus;
     private LocalDateTime registrationDate;
-
     private String message;
 }

@@ -30,25 +30,14 @@ public class StudentRegistrationServiceImpl implements StudentRegistrationServic
 
     @Override
     public StudentRegistrationResponse registerStudent(StudentRegistrationRequest request) {
-        // Validate request
         List<String> errors = studentValidator.validateStudentRegistration(request);
         if (!errors.isEmpty()) {
             throw new RuntimeException("Validation failed: " + String.join(", ", errors));
         }
-
-        // Map request to User entity
         User user = studentMapper.toUser(request);
-
-        // Encode password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        // Generate student ID
         user.setStudentId(generateStudentId());
-
-        // Save user
         User savedUser = userRepository.save(user);
-
-        // Return response
         return studentMapper.toRegistrationResponse(savedUser, "Student registered successfully. Student ID: " + savedUser.getStudentId());
     }
 

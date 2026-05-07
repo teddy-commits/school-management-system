@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class LoginRequest {
 
     @NotBlank(message = "ID is required (Student ID or Employee ID)")
-    private String id;  // Can be Student ID or Employee ID
+    private String id;
 
     @NotBlank(message = "Password is required")
     private String password;

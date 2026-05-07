@@ -32,7 +32,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Personal Information
     @Column(nullable = false)
     private String firstName;
 
@@ -49,14 +48,12 @@ public class User {
 
     private String address;
 
-    // University Identification
     @Column(unique = true)
     private String studentId;
 
     @Column(unique = true)
     private String employeeId;
 
-    // Role Information
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -65,7 +62,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Set<Role> additionalRoles = new HashSet<>();
 
-    // Academic Information (for students)
     private String department;
     private String faculty;
     private Integer enrollmentYear;
@@ -73,21 +69,17 @@ public class User {
     private String currentSemester;
     private Double cgpa;
 
-    // Student Type (Regular, Extension, Weekend, Distance)
     @Enumerated(EnumType.STRING)
     private StudentType studentType;
 
-    // Professional Information (for staff & faculty)
     private String designation;
     private String qualification;
     private LocalDateTime joiningDate;
     private Double salary;
 
-    // Status and Tracking
     private Boolean isActive = true;
     private Boolean isEmailVerified = false;
 
-    // Audit Fields
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -96,8 +88,6 @@ public class User {
     private LocalDateTime updatedAt;
 
     private LocalDateTime lastLoginAt;
-
-    // Helper methods
     public String getFullName() {
         return firstName + " " + lastName;
     }

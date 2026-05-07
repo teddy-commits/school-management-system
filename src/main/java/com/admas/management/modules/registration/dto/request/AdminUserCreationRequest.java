@@ -15,8 +15,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminUserCreationRequest {
-
-    // Common fields
     @NotBlank(message = "First name is required")
     @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
     private String firstName;
@@ -36,23 +34,17 @@ public class AdminUserCreationRequest {
     private String phoneNumber;
     private String address;
 
-    private Role role; // Will be set by controller
-
-    // For Instructors and Academic Administrators
-    private String designation;      // Professor, Registrar, HOD, Dean, etc.
-    private String qualification;    // PhD, Masters, etc.
+    private Role role;
+    private String designation;
+    private String qualification;
     private String department;
     private String faculty;
     private LocalDateTime joiningDate;
     private Double salary;
     private String specialization;
     private String officeLocation;
-
-    // For Management Staff
     private String position;
     private String division;
-
-    // For Admin
     private String adminLevel;
     private String permissions;
 }

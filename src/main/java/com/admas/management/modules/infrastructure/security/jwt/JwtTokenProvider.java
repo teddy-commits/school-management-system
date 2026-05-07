@@ -22,11 +22,9 @@ public class JwtTokenProvider {
     private int jwtExpiration;
 
     private Key key() {
-        // Ensure the key is at least 512 bits (64 bytes) for HS512
         byte[] keyBytes = jwtSecret.getBytes();
         if (keyBytes.length < 64) {
             log.warn("JWT secret key is only {} bytes. For HS512, it should be at least 64 bytes. Generating secure key...", keyBytes.length);
-            // Generate a secure key if the provided one is too weak
             return Keys.secretKeyFor(SignatureAlgorithm.HS512);
         }
         return Keys.hmacShaKeyFor(keyBytes);

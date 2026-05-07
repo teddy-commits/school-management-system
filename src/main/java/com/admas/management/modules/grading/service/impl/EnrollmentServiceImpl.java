@@ -41,36 +41,24 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         Course course = courseRepository.findByCourseCode(requestDTO.getCourseCode())
                 .orElseThrow(() -> new RuntimeException("Course not found"));
-
-        // Check if course is open for registration
         if (course.getStatus() != CourseStatus.OPEN) {
             throw new RuntimeException("Course is not open for registration");
         }
-
-        // Check if student is already enrolled
         if (enrollmentRepository.existsByStudentAndCourseAndStatus(student, course, Enrollment.EnrollmentStatus.ENROLLED)) {
             throw new RuntimeException("Student already enrolled in this course");
         }
-
-        // Check if course has available seats
         if (!course.hasAvailableSeats()) {
             throw new RuntimeException("No available seats in this course");
         }
-
-        // Check prerequisites if any
         if (course.getPrerequisites() != null && !course.getPrerequisites().isEmpty()) {
             // TODO: Implement prerequisite checking logic
             log.info("Course has prerequisites: {}", course.getPrerequisites());
         }
-
-        // Create enrollment
         Enrollment enrollment = enrollmentMapper.toEntity(
                 student, course, requestDTO.getSemester(), requestDTO.getAcademicYear()
         );
 
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
-
-        // Update course enrollment count
         course.incrementEnrolledStudents();
         courseRepository.save(course);
 
@@ -87,8 +75,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         enrollment.setStatus(Enrollment.EnrollmentStatus.WITHDRAWN);
         Enrollment updatedEnrollment = enrollmentRepository.save(enrollment);
-
-        // Update course enrollment count
         Course course = enrollment.getCourse();
         course.decrementEnrolledStudents();
         courseRepository.save(course);

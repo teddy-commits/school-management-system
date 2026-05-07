@@ -43,7 +43,7 @@ public class Invoice {
     private LocalDateTime issueDate;
     private LocalDateTime dueDate;
 
-    private String status; // PENDING, PAID, PARTIAL, OVERDUE
+    private String status;
 
     @CreatedDate
     private LocalDateTime createdAt;
