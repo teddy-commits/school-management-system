@@ -1,5 +1,6 @@
 package com.admas.management.modules.registration.dto.request;
 
+import com.admas.management.modules.registration.model.StudentType;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,6 +48,9 @@ public class StudentRegistrationRequest {
     @Min(value = 2000, message = "Enrollment year must be 2000 or later")
     @Max(value = 2030, message = "Enrollment year must be 2030 or earlier")
     private Integer enrollmentYear;
+
+    @NotNull(message = "Student type is required")
+    private StudentType studentType;
 
     private LocalDate dateOfBirth;
     private String nationality;

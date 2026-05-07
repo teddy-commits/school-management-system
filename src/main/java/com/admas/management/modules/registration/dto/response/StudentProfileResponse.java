@@ -1,5 +1,6 @@
 package com.admas.management.modules.registration.dto.response;
 
+import com.admas.management.modules.registration.model.StudentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class StudentProfileResponse {
     private Double cgpa;
     private String currentSemester;
     private Integer totalCredits;
+    private StudentType studentType;
     private Boolean isActive;
     private LocalDateTime createdAt;
 }

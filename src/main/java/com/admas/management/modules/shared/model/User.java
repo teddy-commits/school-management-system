@@ -1,5 +1,6 @@
 package com.admas.management.modules.shared.model;
 
+import com.admas.management.modules.registration.model.StudentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +22,7 @@ import java.util.Set;
                 @UniqueConstraint(columnNames = "employeeId")
         })
 @Data
-@Builder  // ← ADD THIS LINE
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -71,6 +72,10 @@ public class User {
     private Integer graduationYear;
     private String currentSemester;
     private Double cgpa;
+
+    // Student Type (Regular, Extension, Weekend, Distance)
+    @Enumerated(EnumType.STRING)
+    private StudentType studentType;
 
     // Professional Information (for staff & faculty)
     private String designation;

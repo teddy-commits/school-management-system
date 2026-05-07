@@ -1,5 +1,6 @@
 package com.admas.management.modules.registration.dto.response;
 
+import com.admas.management.modules.registration.model.StudentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class StudentRegistrationResponse {
     private String department;
     private String faculty;
     private Integer enrollmentYear;
+    private StudentType studentType;
     private String registrationStatus;
     private LocalDateTime registrationDate;
     private String message;

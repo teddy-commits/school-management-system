@@ -4,8 +4,8 @@ import com.admas.management.modules.registration.dto.request.StudentRegistration
 import com.admas.management.modules.registration.dto.request.StudentUpdateRequest;
 import com.admas.management.modules.registration.dto.response.StudentProfileResponse;
 import com.admas.management.modules.registration.dto.response.StudentRegistrationResponse;
-import com.admas.management.modules.shared.model.User;
 import com.admas.management.modules.shared.model.Role;
+import com.admas.management.modules.shared.model.User;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -24,6 +24,7 @@ public class StudentMapper {
         user.setDepartment(request.getDepartment());
         user.setFaculty(request.getFaculty());
         user.setEnrollmentYear(request.getEnrollmentYear());
+        user.setStudentType(request.getStudentType());  // Add student type
         user.setRole(Role.STUDENT);
         user.setIsActive(true);
         user.setCgpa(0.0);
@@ -41,6 +42,7 @@ public class StudentMapper {
                 .department(user.getDepartment())
                 .faculty(user.getFaculty())
                 .enrollmentYear(user.getEnrollmentYear())
+                .studentType(user.getStudentType())
                 .registrationStatus("SUCCESS")
                 .registrationDate(LocalDateTime.now())
                 .message(message)
@@ -63,6 +65,7 @@ public class StudentMapper {
                 .cgpa(user.getCgpa())
                 .currentSemester(user.getCurrentSemester())
                 .totalCredits(calculateTotalCredits(user))
+                .studentType(user.getStudentType())
                 .isActive(user.getIsActive())
                 .createdAt(user.getCreatedAt())
                 .build();
@@ -70,7 +73,6 @@ public class StudentMapper {
 
     private Integer calculateTotalCredits(User user) {
         // This will be implemented when grading module is ready
-        // For now, return 0
         return 0;
     }
 
@@ -82,5 +84,6 @@ public class StudentMapper {
         if (request.getDepartment() != null) user.setDepartment(request.getDepartment());
         if (request.getFaculty() != null) user.setFaculty(request.getFaculty());
         if (request.getEnrollmentYear() != null) user.setEnrollmentYear(request.getEnrollmentYear());
+        if (request.getStudentType() != null) user.setStudentType(request.getStudentType());
     }
 }
