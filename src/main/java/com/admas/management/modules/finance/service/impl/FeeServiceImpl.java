@@ -40,7 +40,6 @@ public class FeeServiceImpl implements FeeService {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public FeeResponseDTO createFeeStructure(FeeStructureRequestDTO request) {
-        log.info("Creating fee structure: {}", request.getDescription());
 
         FeeStructure feeStructure = new FeeStructure();
         feeStructure.setFeeType(request.getFeeType());
@@ -64,7 +63,6 @@ public class FeeServiceImpl implements FeeService {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public FeeResponseDTO generateFeeForStudent(Long studentId, Long feeStructureId, String semester, Integer academicYear) {
-        log.info("Generating fee for student: {}, structure: {}", studentId, feeStructureId);
 
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -72,10 +70,9 @@ public class FeeServiceImpl implements FeeService {
         FeeStructure feeStructure = feeStructureRepository.findById(feeStructureId)
                 .orElseThrow(() -> new RuntimeException("Fee structure not found"));
 
-        // FIXED: Pass FeeType enum, not String
         boolean exists = feeRepository.existsByStudentAndFeeTypeAndSemester(
                 student,
-                feeStructure.getFeeType(),  // This is FeeType enum
+                feeStructure.getFeeType(),
                 semester
         );
 
@@ -201,14 +198,11 @@ public class FeeServiceImpl implements FeeService {
         return mapToResponseDTO(updatedFee);
     }
 
-    // Additional methods implementation...
     @Override
     public List<FeeResponseDTO> getAllFeeStructures() {
         List<FeeStructure> feeStructures = feeStructureRepository.findAll();
-
-        // Return empty list instead of null or empty string
         if (feeStructures == null || feeStructures.isEmpty()) {
-            return new ArrayList<>();  // Return empty ArrayList, not null
+            return new ArrayList<>();
         }
 
         return feeStructures.stream()

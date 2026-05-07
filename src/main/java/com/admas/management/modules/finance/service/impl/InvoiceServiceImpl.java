@@ -34,24 +34,17 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public InvoiceResponseDTO generateInvoice(Long studentId, String semester, Integer academicYear) {
-        log.info("Generating invoice for student: {}, semester: {}, year: {}", studentId, semester, academicYear);
 
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        // Get all fees for the student for the specified semester
         List<Fee> studentFees = feeRepository.findByStudentAndSemesterAndAcademicYear(student, semester, academicYear);
 
         if (studentFees.isEmpty()) {
             throw new RuntimeException("No fees found for student in this semester");
         }
-
-        // Check if invoice already exists for this semester
         if (invoiceRepository.existsByStudentAndSemesterAndAcademicYear(student, semester, academicYear)) {
             throw new RuntimeException("Invoice already exists for this student and semester");
         }
-
-        // Create new invoice
         Invoice invoice = new Invoice();
         invoice.setInvoiceNumber(generateInvoiceNumber());
         invoice.setStudent(student);
@@ -61,8 +54,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setIssueDate(LocalDateTime.now());
         invoice.setDueDate(calculateDueDate(semester, academicYear));
         invoice.setCreatedAt(LocalDateTime.now());
-
-        // Calculate totals
         invoice.calculateTotals();
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
@@ -132,16 +123,12 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public void sendInvoiceEmail(Long invoiceId) {
-        log.info("Sending invoice email for invoice: {}", invoiceId);
-        // Implement email sending logic here
-        // This would typically use JavaMailSender
+        
     }
 
     @Override
     public byte[] generateInvoicePDF(Long invoiceId) {
         log.info("Generating PDF for invoice: {}", invoiceId);
-        // Implement PDF generation logic here
-        // This would typically use iText or JasperReports
         return new byte[0];
     }
 
@@ -161,7 +148,6 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     private LocalDateTime calculateDueDate(String semester, Integer academicYear) {
-        // Set due date based on semester (e.g., 30 days after semester start)
         return LocalDateTime.now().plusDays(30);
     }
 

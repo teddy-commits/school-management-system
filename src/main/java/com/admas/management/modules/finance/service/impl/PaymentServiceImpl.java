@@ -66,8 +66,6 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setReceiptNumber(generateReceiptNumber());
 
         Payment savedPayment = paymentRepository.save(payment);
-
-        // Update fee payment status
         if (fee != null) {
             fee.setPaidAmount(fee.getPaidAmount() + request.getAmount());
             fee.calculateDueAmount();
@@ -79,7 +77,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentResponseDTO processPartialPayment(PaymentRequestDTO request, String receivedBy) {
-        log.info("Processing partial payment for student: {}", request.getStudentId());
         PaymentResponseDTO response = processPayment(request, receivedBy);
         response.setMessage("Partial payment processed successfully");
         return response;
@@ -88,7 +85,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE_MANAGER')")
     public PaymentResponseDTO refundPayment(Long paymentId, String reason) {
-        log.info("Refunding payment: {}, reason: {}", paymentId, reason);
 
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
@@ -97,8 +93,6 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setRemarks("REFUNDED: " + reason + " | " + (payment.getRemarks() != null ? payment.getRemarks() : ""));
 
         Payment updatedPayment = paymentRepository.save(payment);
-
-        // Update fee payment status
         if (payment.getFee() != null) {
             Fee fee = payment.getFee();
             fee.setPaidAmount(fee.getPaidAmount() - payment.getAmount());
@@ -160,8 +154,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public byte[] generateReceipt(Long paymentId) {
-        // This would generate a PDF receipt
-        // For now, return empty byte array
         log.info("Generating receipt for payment: {}", paymentId);
         return new byte[0];
     }
@@ -197,7 +189,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public FinancialReportDTO generateMonthlyReport(Integer year, Integer month) {
-        // Implementation
         return FinancialReportDTO.builder()
                 .reportDate(LocalDateTime.now())
                 .reportPeriod(String.format("Monthly - %d-%02d", year, month))

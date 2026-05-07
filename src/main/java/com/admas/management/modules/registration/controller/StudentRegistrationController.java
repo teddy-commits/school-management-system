@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/registration/students")
+@RequestMapping("/registration/students/")
 @RequiredArgsConstructor
 public class StudentRegistrationController {
 

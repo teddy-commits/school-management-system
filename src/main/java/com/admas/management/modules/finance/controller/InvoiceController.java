@@ -19,7 +19,6 @@ public class InvoiceController {
     private final InvoiceService invoiceService;
     private final SecurityService securityService;
 
-    // Generate Invoice for Student
     @PostMapping("/students/{studentId}/invoices")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<InvoiceResponseDTO> generateInvoice(
@@ -29,7 +28,6 @@ public class InvoiceController {
         return ResponseEntity.ok(invoiceService.generateInvoice(studentId, semester, academicYear));
     }
 
-    // Get Student Invoices
     @GetMapping("/students/{studentId}/invoices")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<List<InvoiceResponseDTO>> getStudentInvoices(@PathVariable Long studentId) {
@@ -39,35 +37,29 @@ public class InvoiceController {
         return ResponseEntity.ok(invoiceService.getStudentInvoices(studentId));
     }
 
-    // Get Invoice by ID
     @GetMapping("/invoices/{invoiceId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<InvoiceResponseDTO> getInvoiceById(@PathVariable Long invoiceId) {
         return ResponseEntity.ok(invoiceService.getInvoiceById(invoiceId));
     }
 
-    // Get Invoice by Number
     @GetMapping("/invoices/number/{invoiceNumber}")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<InvoiceResponseDTO> getInvoiceByNumber(@PathVariable String invoiceNumber) {
         return ResponseEntity.ok(invoiceService.getInvoiceByNumber(invoiceNumber));
     }
-
-    // Get All Invoices (Admin only)
     @GetMapping("/invoices")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<List<InvoiceResponseDTO>> getAllInvoices() {
         return ResponseEntity.ok(invoiceService.getAllInvoices());
     }
 
-    // Get Overdue Invoices
     @GetMapping("/invoices/overdue")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<List<InvoiceResponseDTO>> getOverdueInvoices() {
         return ResponseEntity.ok(invoiceService.getOverdueInvoices());
     }
 
-    // Download Invoice PDF
     @GetMapping("/invoices/{invoiceId}/download")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<byte[]> downloadInvoice(@PathVariable Long invoiceId) {

@@ -30,7 +30,6 @@ public class PaymentController {
     private final PaymentValidator paymentValidator;
     private final SecurityService securityService;
 
-    // Process Payment
     @PostMapping("/payments")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<?> processPayment(@Valid @RequestBody PaymentRequestDTO request, Authentication authentication) {
@@ -45,7 +44,6 @@ public class PaymentController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Process Partial Payment
     @PostMapping("/payments/partial")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<PaymentResponseDTO> processPartialPayment(@Valid @RequestBody PaymentRequestDTO request, Authentication authentication) {
@@ -54,7 +52,6 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    // Refund Payment
     @PostMapping("/payments/{paymentId}/refund")
     @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE_MANAGER')")
     public ResponseEntity<PaymentResponseDTO> refundPayment(@PathVariable Long paymentId, @RequestParam String reason) {
@@ -62,7 +59,6 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    // Get Student Payments
     @GetMapping("/students/{studentId}/payments")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<List<PaymentResponseDTO>> getStudentPayments(@PathVariable Long studentId) {
@@ -72,21 +68,18 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getStudentPayments(studentId));
     }
 
-    // Get All Payments (Admin only)
     @GetMapping("/payments")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<List<PaymentResponseDTO>> getAllPayments() {
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
-    // Get Payment by ID
     @GetMapping("/payments/{paymentId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<PaymentResponseDTO> getPaymentById(@PathVariable Long paymentId) {
         return ResponseEntity.ok(paymentService.getPaymentById(paymentId));
     }
 
-    // Get Payments by Date Range
     @GetMapping("/payments/report/date-range")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<List<PaymentResponseDTO>> getPaymentsByDateRange(
@@ -95,7 +88,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getPaymentsByDateRange(startDate, endDate));
     }
 
-    // Generate Payment Receipt
     @GetMapping("/payments/{paymentId}/receipt")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<byte[]> generateReceipt(@PathVariable Long paymentId) {
@@ -108,7 +100,6 @@ public class PaymentController {
         return new ResponseEntity<>(receipt, headers, HttpStatus.OK);
     }
 
-    // Daily Financial Report
     @GetMapping("/reports/daily")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FinancialReportDTO> generateDailyReport(
@@ -118,7 +109,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.generateDailyReport(startOfDay));
     }
 
-    // Monthly Financial Report
     @GetMapping("/reports/monthly")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FinancialReportDTO> generateMonthlyReport(
@@ -127,7 +117,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.generateMonthlyReport(year, month));
     }
 
-    // Semester Financial Report
     @GetMapping("/reports/semester")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FinancialReportDTO> generateSemesterReport(
@@ -136,7 +125,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.generateSemesterReport(semester, academicYear));
     }
 
-    // Department Financial Report
     @GetMapping("/reports/department")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FinancialReportDTO> generateDepartmentReport(
