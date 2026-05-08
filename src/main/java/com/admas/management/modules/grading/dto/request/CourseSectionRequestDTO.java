@@ -1,4 +1,37 @@
-package com.admas.management.modules.grading.dto.request;
+package com.admas.management.modules.grading.model.dto.request;
 
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CourseSectionRequestDTO {
+
+    @NotNull(message = "Course ID is required")
+    private Long courseId;
+
+    @NotBlank(message = "Section code is required")
+    @Size(min = 1, max = 10, message = "Section code must be between 1 and 10 characters")
+    private String sectionCode;
+
+    @NotBlank(message = "Semester is required")
+    private String semester;
+
+    @NotNull(message = "Academic year is required")
+    private Integer academicYear;
+
+    private Long instructorId;
+
+    @Min(value = 5, message = "Minimum 5 students per section")
+    @Max(value = 100, message = "Maximum 100 students per section")
+    private Integer maxStudents = 40;
+
+    private String schedule;
+    private String room;
+    private String status;
 }
