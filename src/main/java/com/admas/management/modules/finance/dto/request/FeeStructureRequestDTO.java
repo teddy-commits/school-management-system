@@ -1,4 +1,4 @@
-package com.admas.management.modules.finance.model.dto.request;
+package com.admas.management.modules.finance.dto.request;
 
 import com.admas.management.modules.finance.model.enums.FeeCategory;
 import com.admas.management.modules.finance.model.enums.FeeType;

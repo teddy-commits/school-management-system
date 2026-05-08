@@ -2,15 +2,12 @@ package com.admas.management.modules.finance.service.impl;
 
 import com.admas.management.modules.finance.dto.response.FeeResponseDTO;
 import com.admas.management.modules.finance.dto.response.FeeSummaryDTO;
-import com.admas.management.modules.finance.model.dto.request.FeeStructureRequestDTO;
+import com.admas.management.modules.finance.dto.request.FeeStructureRequestDTO;
 import com.admas.management.modules.finance.model.entity.Fee;
 import com.admas.management.modules.finance.model.entity.FeeStructure;
-import com.admas.management.modules.finance.model.entity.Payment;
 import com.admas.management.modules.finance.model.enums.PaymentStatus;
 import com.admas.management.modules.finance.repository.FeeRepository;
 import com.admas.management.modules.finance.repository.FeeStructureRepository;
-import com.admas.management.modules.finance.repository.PaymentRepository;
-import com.admas.management.modules.finance.service.FeeCalculationService;
 import com.admas.management.modules.finance.service.FeeService;
 import com.admas.management.modules.shared.model.User;
 import com.admas.management.modules.shared.repository.UserRepository;
@@ -21,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,13 +29,12 @@ public class FeeServiceImpl implements FeeService {
 
     private final FeeRepository feeRepository;
     private final FeeStructureRepository feeStructureRepository;
-    private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
-    private final FeeCalculationService feeCalculationService;
 
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public FeeResponseDTO createFeeStructure(FeeStructureRequestDTO request) {
+        log.info("Creating fee structure: {}", request.getDescription());
 
         FeeStructure feeStructure = new FeeStructure();
         feeStructure.setFeeType(request.getFeeType());
@@ -57,12 +52,13 @@ public class FeeServiceImpl implements FeeService {
         feeStructure.setIsActive(true);
 
         FeeStructure saved = feeStructureRepository.save(feeStructure);
-        return mapToResponseDTO(saved);
+        return mapFeeStructureToResponseDTO(saved);
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public FeeResponseDTO generateFeeForStudent(Long studentId, Long feeStructureId, String semester, Integer academicYear) {
+        log.info("Generating fee for student: {}, structure: {}", studentId, feeStructureId);
 
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -70,11 +66,9 @@ public class FeeServiceImpl implements FeeService {
         FeeStructure feeStructure = feeStructureRepository.findById(feeStructureId)
                 .orElseThrow(() -> new RuntimeException("Fee structure not found"));
 
+        // Check if fee already exists
         boolean exists = feeRepository.existsByStudentAndFeeTypeAndSemester(
-                student,
-                feeStructure.getFeeType(),
-                semester
-        );
+                student, feeStructure.getFeeType(), semester);
 
         if (exists) {
             throw new RuntimeException("Fee already generated for this student and semester");
@@ -94,7 +88,7 @@ public class FeeServiceImpl implements FeeService {
         fee.setInvoiceNumber(generateInvoiceNumber());
 
         Fee savedFee = feeRepository.save(fee);
-        return mapToResponseDTO(savedFee);
+        return mapFeeToResponseDTO(savedFee);
     }
 
     @Override
@@ -105,7 +99,7 @@ public class FeeServiceImpl implements FeeService {
 
         return feeRepository.findByStudent(student)
                 .stream()
-                .map(this::mapToResponseDTO)
+                .map(this::mapFeeToResponseDTO)
                 .collect(Collectors.toList());
     }
 
@@ -116,20 +110,13 @@ public class FeeServiceImpl implements FeeService {
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
         List<Fee> fees = feeRepository.findByStudent(student);
-        List<Payment> payments = paymentRepository.findByStudent(student);
 
         double totalFees = fees.stream().mapToDouble(Fee::getAmount).sum();
-        double totalPaid = feeCalculationService.calculateTotalPaid(payments);
-        double totalOutstanding = feeCalculationService.calculateOutstandingBalance(totalFees, totalPaid);
-        double totalLateFees = fees.stream().mapToDouble(f -> feeCalculationService.calculateLateFee(f, LocalDateTime.now())).sum();
+        double totalPaid = fees.stream().mapToDouble(Fee::getPaidAmount).sum();
+        double totalOutstanding = fees.stream().mapToDouble(Fee::getDueAmount).sum();
 
-        long pendingFeesCount = fees.stream()
-                .filter(f -> f.getStatus() == PaymentStatus.PENDING || f.getStatus() == PaymentStatus.PARTIAL)
-                .count();
-
-        long overdueFeesCount = fees.stream()
-                .filter(f -> f.getDueDate() != null && f.getDueDate().isBefore(LocalDateTime.now())
-                        && f.getStatus() != PaymentStatus.PAID)
+        long pendingCount = fees.stream()
+                .filter(f -> f.getStatus() == PaymentStatus.PENDING)
                 .count();
 
         return FeeSummaryDTO.builder()
@@ -139,11 +126,7 @@ public class FeeServiceImpl implements FeeService {
                 .totalFees(totalFees)
                 .totalPaid(totalPaid)
                 .totalOutstanding(totalOutstanding)
-                .totalLateFees(totalLateFees)
-                .pendingFeesCount((int) pendingFeesCount)
-                .overdueFeesCount((int) overdueFeesCount)
-                .recentFees(fees.stream().limit(5).map(this::mapToResponseDTO).collect(Collectors.toList()))
-                .message("Fee summary calculated successfully")
+                .pendingFeesCount((int) pendingCount)
                 .build();
     }
 
@@ -152,7 +135,7 @@ public class FeeServiceImpl implements FeeService {
     public List<FeeResponseDTO> getOverdueFees() {
         return feeRepository.findByDueDateBeforeAndStatus(LocalDateTime.now(), PaymentStatus.PENDING)
                 .stream()
-                .map(this::mapToResponseDTO)
+                .map(this::mapFeeToResponseDTO)
                 .collect(Collectors.toList());
     }
 
@@ -162,18 +145,9 @@ public class FeeServiceImpl implements FeeService {
         Fee fee = feeRepository.findById(feeId)
                 .orElseThrow(() -> new RuntimeException("Fee not found"));
 
-        double lateFee = feeCalculationService.calculateLateFee(fee, LocalDateTime.now());
-
-        if (lateFee > 0) {
-            fee.setLateFee(lateFee);
-            fee.setAmount(fee.getAmount() + lateFee);
-            fee.setDueAmount(fee.getDueAmount() + lateFee);
-            fee.setIsLate(true);
-            Fee updatedFee = feeRepository.save(fee);
-            return mapToResponseDTO(updatedFee);
-        }
-
-        return mapToResponseDTO(fee);
+        fee.applyLateFee();
+        Fee updatedFee = feeRepository.save(fee);
+        return mapFeeToResponseDTO(updatedFee);
     }
 
     @Override
@@ -188,48 +162,96 @@ public class FeeServiceImpl implements FeeService {
 
         fee.setAmount(fee.getAmount() - waiveAmount);
         fee.setDueAmount(fee.getDueAmount() - waiveAmount);
-        fee.setRemarks("WAIVED: " + reason + " | Amount: " + waiveAmount);
 
         if (fee.getDueAmount() <= 0) {
             fee.setStatus(PaymentStatus.PAID);
         }
 
         Fee updatedFee = feeRepository.save(fee);
-        return mapToResponseDTO(updatedFee);
+        return mapFeeToResponseDTO(updatedFee);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<FeeResponseDTO> getAllFeeStructures() {
-        List<FeeStructure> feeStructures = feeStructureRepository.findAll();
-        if (feeStructures == null || feeStructures.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        return feeStructures.stream()
-                .map(this::mapToResponseDTO)
+        return feeStructureRepository.findAll()
+                .stream()
+                .map(this::mapFeeStructureToResponseDTO)
                 .collect(Collectors.toList());
     }
-    @Override public FeeResponseDTO updateFeeStructure(Long id, FeeStructureRequestDTO request) { return null; }
-    @Override public void deleteFeeStructure(Long id) {}
-    @Override public List<FeeResponseDTO> generateAllFeesForSemester(String semester, Integer academicYear) { return null; }
-    @Override public FeeResponseDTO getFeeById(Long feeId) { return null; }
-    @Override public List<FeeResponseDTO> getPendingFeesByStudent(Long studentId) { return null; }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
+    public FeeResponseDTO updateFeeStructure(Long id, FeeStructureRequestDTO request) {
+        FeeStructure feeStructure = feeStructureRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Fee structure not found"));
+
+        feeStructure.setDescription(request.getDescription());
+        feeStructure.setAmount(request.getAmount());
+        feeStructure.setDepartment(request.getDepartment());
+        feeStructure.setFaculty(request.getFaculty());
+        feeStructure.setIsMandatory(request.getIsMandatory());
+        feeStructure.setAcademicYear(request.getAcademicYear());
+        feeStructure.setSemester(request.getSemester());
+        feeStructure.setDueDate(request.getDueDate());
+        feeStructure.setGracePeriodDays(request.getGracePeriodDays());
+        feeStructure.setLateFeePercentage(request.getLateFeePercentage());
+
+        FeeStructure updated = feeStructureRepository.save(feeStructure);
+        return mapFeeStructureToResponseDTO(updated);
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
+    public void deleteFeeStructure(Long id) {
+        feeStructureRepository.deleteById(id);
+        log.info("Deleted fee structure with id: {}", id);
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
+    public List<FeeResponseDTO> generateAllFeesForSemester(String semester, Integer academicYear) {
+        // This would generate fees for all students
+        log.info("Generating fees for all students for semester: {} {}", semester, academicYear);
+        return List.of(); // Placeholder
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FeeResponseDTO getFeeById(Long feeId) {
+        Fee fee = feeRepository.findById(feeId)
+                .orElseThrow(() -> new RuntimeException("Fee not found"));
+        return mapFeeToResponseDTO(fee);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FeeResponseDTO> getPendingFeesByStudent(Long studentId) {
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        return feeRepository.findByStudentAndStatus(student, PaymentStatus.PENDING)
+                .stream()
+                .map(this::mapFeeToResponseDTO)
+                .collect(Collectors.toList());
+    }
 
     private String generateInvoiceNumber() {
         return "INV-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000);
     }
 
-    private FeeResponseDTO mapToResponseDTO(FeeStructure feeStructure) {
+    private FeeResponseDTO mapFeeStructureToResponseDTO(FeeStructure feeStructure) {
         return FeeResponseDTO.builder()
                 .id(feeStructure.getId())
                 .feeType(feeStructure.getFeeType())
                 .description(feeStructure.getDescription())
                 .amount(feeStructure.getAmount())
                 .isMandatory(feeStructure.getIsMandatory())
+                .dueDate(feeStructure.getDueDate())
                 .build();
     }
 
-    private FeeResponseDTO mapToResponseDTO(Fee fee) {
+    private FeeResponseDTO mapFeeToResponseDTO(Fee fee) {
         return FeeResponseDTO.builder()
                 .id(fee.getId())
                 .studentId(fee.getStudent().getId())
