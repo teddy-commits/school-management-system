@@ -1,6 +1,5 @@
 package com.admas.management.modules.registration.dto.request;
 
-
 import com.admas.management.modules.shared.model.Role;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -15,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminUserCreationRequest {
+
     @NotBlank(message = "First name is required")
     @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
     private String firstName;
@@ -37,6 +37,11 @@ public class AdminUserCreationRequest {
     private Role role;
     private String designation;
     private String qualification;
+
+    // Remove @NotNull - make departmentId optional
+    // Only required for INSTRUCTOR role (validate in service layer)
+    private Long departmentId;
+
     private String department;
     private String faculty;
     private LocalDateTime joiningDate;

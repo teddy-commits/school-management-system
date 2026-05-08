@@ -26,7 +26,7 @@ public class AdminUserUpdateRequest {
     private Role role;
     private String designation;
     private String qualification;
-    private String department;
+    private Long departmentId;  // Changed from String department to Long departmentId
     private String faculty;
     private LocalDateTime joiningDate;
     private Double salary;

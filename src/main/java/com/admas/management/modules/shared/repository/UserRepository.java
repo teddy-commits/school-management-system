@@ -19,8 +19,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRole(Role role);
     List<User> findByRoleIn(List<Role> roles);
+    // In UserRepository.java - Make sure this exists
+    @Query("SELECT u FROM User u WHERE u.department.name = :departmentName")
+    List<User> findByDepartment(@Param("departmentName") String departmentName);
+    List<User> findByDepartmentId(Long departmentId);
+    @Query("SELECT u FROM User u WHERE u.department.name = :departmentName")
+    List<User> findByDepartmentName(@Param("departmentName") String departmentName);
 
-    List<User> findByDepartment(String department);
+    // Option 3: Find by department entity
+    List<User> findByDepartment(com.admas.management.modules.department.model.Department department);
+
     List<User> findByFaculty(String faculty);
     List<User> findByIsActive(Boolean isActive);
     List<User> findByEnrollmentYear(Integer year);

@@ -1,5 +1,7 @@
 package com.admas.management.modules.registration.service.impl;
 
+import com.admas.management.modules.department.model.Department;
+import com.admas.management.modules.department.repository.DepartmentRepository;
 import com.admas.management.modules.registration.dto.request.AdminUserCreationRequest;
 import com.admas.management.modules.registration.dto.request.AdminUserUpdateRequest;
 import com.admas.management.modules.registration.dto.response.UserProfileResponse;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 public class AdminUserServiceImpl implements AdminUserService {
 
     private final UserRepository userRepository;
+    private final DepartmentRepository departmentRepository;  // Add this
     private final AdminUserMapper adminUserMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -35,18 +38,41 @@ public class AdminUserServiceImpl implements AdminUserService {
     public UserRegistrationResponse createUser(AdminUserCreationRequest request) {
         log.info("Creating new user with role: {}", request.getRole());
 
+        // Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered: " + request.getEmail());
         }
 
+        // Validate department ONLY for INSTRUCTOR role
+        // Remove the check for academic administrators
+        if (request.getRole() == Role.INSTRUCTOR && request.getDepartmentId() == null) {
+            throw new RuntimeException("Department is required for instructors");
+        }
+
+        // Verify department exists only if provided (for any role)
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));
+        }
+
+        // Map request to User entity
         User user = adminUserMapper.toEntity(request);
 
+        // Encode password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // Generate employee ID
         user.setEmployeeId(generateEmployeeId());
+
+        // Set joining date if not provided
         if (user.getJoiningDate() == null) {
             user.setJoiningDate(LocalDateTime.now());
         }
+
+        // Set active status
         user.setIsActive(true);
+
+        // Save user
         User savedUser = userRepository.save(user);
 
         String message = String.format("%s created successfully with Employee ID: %s",
@@ -54,7 +80,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         return adminUserMapper.toRegistrationResponse(savedUser, message);
     }
-
     @Override
     @Transactional(readOnly = true)
     public List<UserProfileResponse> getUsersByRole(Role role) {
@@ -78,21 +103,15 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
-        if (request.getLastName() != null) user.setLastName(request.getLastName());
-        if (request.getEmail() != null) user.setEmail(request.getEmail());
-        if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
-        if (request.getAddress() != null) user.setAddress(request.getAddress());
-        if (request.getRole() != null) user.setRole(request.getRole());
-        if (request.getDesignation() != null) user.setDesignation(request.getDesignation());
-        if (request.getQualification() != null) user.setQualification(request.getQualification());
-        if (request.getDepartment() != null) user.setDepartment(request.getDepartment());
-        if (request.getFaculty() != null) user.setFaculty(request.getFaculty());
-        if (request.getJoiningDate() != null) user.setJoiningDate(request.getJoiningDate());
-        if (request.getSalary() != null) user.setSalary(request.getSalary());
-        if (request.getOfficeLocation() != null) user.setAddress(request.getOfficeLocation());
-        if (request.getPosition() != null) user.setDesignation(request.getPosition());
-        if (request.getIsActive() != null) user.setIsActive(request.getIsActive());
+
+        // If department ID is being updated, verify department exists
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));
+        }
+
+        // Use mapper for updates to handle department relationship
+        adminUserMapper.updateEntityFromRequest(user, request);
 
         User updatedUser = userRepository.save(user);
 

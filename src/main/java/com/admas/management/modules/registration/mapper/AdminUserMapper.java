@@ -1,19 +1,24 @@
 package com.admas.management.modules.registration.mapper;
 
 
+import com.admas.management.modules.department.model.Department;
+import com.admas.management.modules.department.repository.DepartmentRepository;
 import com.admas.management.modules.registration.dto.request.AdminUserCreationRequest;
-
 import com.admas.management.modules.registration.dto.request.AdminUserUpdateRequest;
 import com.admas.management.modules.registration.dto.response.UserProfileResponse;
 import com.admas.management.modules.registration.dto.response.UserRegistrationResponse;
 import com.admas.management.modules.shared.model.Role;
 import com.admas.management.modules.shared.model.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
+@RequiredArgsConstructor
 public class AdminUserMapper {
+
+    private final DepartmentRepository departmentRepository;
 
     public User toEntity(AdminUserCreationRequest request) {
         User user = new User();
@@ -24,6 +29,15 @@ public class AdminUserMapper {
         user.setAddress(request.getAddress());
         user.setRole(request.getRole());
 
+        // Set department if departmentId is provided
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));
+            user.setDepartment(department);
+            user.setDepartmentName(department.getName());
+            user.setFaculty(department.getFaculty());
+        }
+
         switch (request.getRole()) {
             case INSTRUCTOR:
             case SENIOR_INSTRUCTOR:
@@ -32,8 +46,6 @@ public class AdminUserMapper {
             case ASSISTANT_PROFESSOR:
                 user.setDesignation(request.getDesignation());
                 user.setQualification(request.getQualification());
-                user.setDepartment(request.getDepartment());
-                user.setFaculty(request.getFaculty());
                 user.setJoiningDate(request.getJoiningDate());
                 user.setSalary(request.getSalary());
                 break;
@@ -43,8 +55,6 @@ public class AdminUserMapper {
             case DEAN:
             case REGISTRAR:
                 user.setDesignation(request.getDesignation());
-                user.setDepartment(request.getDepartment());
-                user.setFaculty(request.getFaculty());
                 user.setJoiningDate(request.getJoiningDate());
                 break;
 
@@ -74,7 +84,7 @@ public class AdminUserMapper {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .userType(determineUserType(user))
-                .department(user.getDepartment())
+                .department(user.getDepartmentName())
                 .designation(user.getDesignation())
                 .registrationStatus("SUCCESS")
                 .registrationDate(LocalDateTime.now())
@@ -95,7 +105,7 @@ public class AdminUserMapper {
                 .role(user.getRole())
                 .additionalRoles(user.getAdditionalRoles())
                 .userType(determineUserType(user))
-                .department(user.getDepartment())
+                .department(user.getDepartmentName())
                 .faculty(user.getFaculty())
                 .designation(user.getDesignation())
                 .qualification(user.getQualification())
@@ -112,10 +122,38 @@ public class AdminUserMapper {
         if (request.getAddress() != null) user.setAddress(request.getAddress());
         if (request.getDesignation() != null) user.setDesignation(request.getDesignation());
         if (request.getQualification() != null) user.setQualification(request.getQualification());
-        if (request.getDepartment() != null) user.setDepartment(request.getDepartment());
-        if (request.getFaculty() != null) user.setFaculty(request.getFaculty());
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found"));
+            user.setDepartment(department);
+            user.setDepartmentName(department.getName());
+            user.setFaculty(department.getFaculty());
+        }
         if (request.getSalary() != null) user.setSalary(request.getSalary());
         if (request.getOfficeLocation() != null) user.setAddress(request.getOfficeLocation());
+    }
+
+    public void updateEntityFromRequest(User user, AdminUserUpdateRequest request) {
+        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) user.setLastName(request.getLastName());
+        if (request.getEmail() != null) user.setEmail(request.getEmail());
+        if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
+        if (request.getAddress() != null) user.setAddress(request.getAddress());
+        if (request.getRole() != null) user.setRole(request.getRole());
+        if (request.getDesignation() != null) user.setDesignation(request.getDesignation());
+        if (request.getQualification() != null) user.setQualification(request.getQualification());
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found"));
+            user.setDepartment(department);
+            user.setDepartmentName(department.getName());
+            user.setFaculty(department.getFaculty());
+        }
+        if (request.getJoiningDate() != null) user.setJoiningDate(request.getJoiningDate());
+        if (request.getSalary() != null) user.setSalary(request.getSalary());
+        if (request.getOfficeLocation() != null) user.setAddress(request.getOfficeLocation());
+        if (request.getPosition() != null) user.setDesignation(request.getPosition());
+        if (request.getIsActive() != null) user.setIsActive(request.getIsActive());
     }
 
     private String determineUserType(User user) {
@@ -126,23 +164,7 @@ public class AdminUserMapper {
         if (user.isStudent()) return "STUDENT";
         return "USER";
     }
-    public void updateEntityFromRequest(User user, AdminUserUpdateRequest request) {
-        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
-        if (request.getLastName() != null) user.setLastName(request.getLastName());
-        if (request.getEmail() != null) user.setEmail(request.getEmail());
-        if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
-        if (request.getAddress() != null) user.setAddress(request.getAddress());
-        if (request.getRole() != null) user.setRole(request.getRole());
-        if (request.getDesignation() != null) user.setDesignation(request.getDesignation());
-        if (request.getQualification() != null) user.setQualification(request.getQualification());
-        if (request.getDepartment() != null) user.setDepartment(request.getDepartment());
-        if (request.getFaculty() != null) user.setFaculty(request.getFaculty());
-        if (request.getJoiningDate() != null) user.setJoiningDate(request.getJoiningDate());
-        if (request.getSalary() != null) user.setSalary(request.getSalary());
-        if (request.getOfficeLocation() != null) user.setAddress(request.getOfficeLocation());
-        if (request.getPosition() != null) user.setDesignation(request.getPosition());
-        if (request.getIsActive() != null) user.setIsActive(request.getIsActive());
-    }
+
     private String getPermissionsForRole(Role role) {
         return switch (role) {
             case INSTRUCTOR, SENIOR_INSTRUCTOR, PROFESSOR ->

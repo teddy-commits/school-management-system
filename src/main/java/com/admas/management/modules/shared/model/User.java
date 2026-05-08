@@ -1,5 +1,6 @@
 package com.admas.management.modules.shared.model;
 
+import com.admas.management.modules.department.model.Department;
 import com.admas.management.modules.registration.model.StudentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -45,7 +46,6 @@ public class User {
     private String password;
 
     private String phoneNumber;
-
     private String address;
 
     @Column(unique = true)
@@ -62,8 +62,17 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Set<Role> additionalRoles = new HashSet<>();
 
-    private String department;
+    // Department Relationship (Foreign Key)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;  // This is the relationship field
+
+    // For backward compatibility - keep as transient or remove
+    @Transient  // This won't be stored in database
+    private String departmentName;
+
     private String faculty;
+
     private Integer enrollmentYear;
     private Integer graduationYear;
     private String currentSemester;
@@ -88,6 +97,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     private LocalDateTime lastLoginAt;
+
     public String getFullName() {
         return firstName + " " + lastName;
     }
@@ -116,5 +126,13 @@ public class User {
         if (studentId != null) return studentId;
         if (employeeId != null) return employeeId;
         return email;
+    }
+
+    // Helper method to get department name safely
+    public String getDepartmentName() {
+        if (department != null) {
+            return department.getName();
+        }
+        return null;
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -39,7 +40,21 @@ public class CourseController {
         CourseResponseDTO response = courseService.getCourseById(id);
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/instructor/my-courses")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'PROFESSOR', 'ADMIN')")
+    public ResponseEntity<List<CourseResponseDTO>> getMyCourses(Authentication authentication) {
+        String instructorEmail = authentication.getName();
+        List<CourseResponseDTO> courses = courseService.getCoursesByInstructorDepartment(instructorEmail);
+        return ResponseEntity.ok(courses);
+    }
 
+    @GetMapping("/instructor/available")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'PROFESSOR', 'ADMIN')")
+    public ResponseEntity<List<CourseResponseDTO>> getAvailableCoursesForInstructor(Authentication authentication) {
+        String instructorEmail = authentication.getName();
+        List<CourseResponseDTO> courses = courseService.getAvailableCoursesForInstructor(instructorEmail);
+        return ResponseEntity.ok(courses);
+    }
     @GetMapping("/code/{courseCode}")
     public ResponseEntity<CourseResponseDTO> getCourseByCode(@PathVariable String courseCode) {
         CourseResponseDTO response = courseService.getCourseByCode(courseCode);

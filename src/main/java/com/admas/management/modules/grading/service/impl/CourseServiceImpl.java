@@ -8,6 +8,8 @@ import com.admas.management.modules.grading.model.enums.CourseStatus;
 import com.admas.management.modules.grading.model.enums.Semester;
 import com.admas.management.modules.grading.repository.CourseRepository;
 import com.admas.management.modules.grading.service.CourseService;
+import com.admas.management.modules.shared.model.User;
+import com.admas.management.modules.shared.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +27,7 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
+    private final UserRepository userRepository;
 
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
@@ -112,6 +115,63 @@ public class CourseServiceImpl implements CourseService {
     public List<CourseResponseDTO> getCoursesByInstructor(String instructorEmail) {
         return courseRepository.findByInstructorEmail(instructorEmail)
                 .stream()
+                .map(courseMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CourseResponseDTO> getCoursesByInstructorDepartment(String instructorEmail) {
+        log.info("Fetching courses for instructor: {}", instructorEmail);
+
+        // Get instructor from user record
+        User instructor = userRepository.findByEmail(instructorEmail)
+                .orElseThrow(() -> new RuntimeException("Instructor not found with email: " + instructorEmail));
+
+        // Get department name (for logging only)
+        String departmentName = null;
+        if (instructor.getDepartment() != null) {
+            departmentName = instructor.getDepartment().getName();
+        } else if (instructor.getDepartmentName() != null) {
+            departmentName = instructor.getDepartmentName();
+        }
+
+        log.info("Instructor {} belongs to department: {}, fetching assigned courses", instructorEmail, departmentName);
+
+        // Return ONLY courses where this instructor is the assigned instructor
+        List<Course> courses = courseRepository.findByInstructorEmail(instructorEmail);
+
+        log.info("Found {} courses assigned to instructor {}", courses.size(), instructorEmail);
+
+        return courses.stream()
+                .map(courseMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<CourseResponseDTO> getAvailableCoursesForInstructor(String instructorEmail) {
+        log.info("Fetching available courses for instructor: {}", instructorEmail);
+
+        User instructor = userRepository.findByEmail(instructorEmail)
+                .orElseThrow(() -> new RuntimeException("Instructor not found with email: " + instructorEmail));
+
+        // Get department name from the department relationship
+        String departmentName = null;
+        if (instructor.getDepartment() != null) {
+            departmentName = instructor.getDepartment().getName();
+        } else if (instructor.getDepartmentName() != null) {
+            departmentName = instructor.getDepartmentName();
+        }
+
+        if (departmentName == null) {
+            log.warn("Instructor {} has no department assigned", instructorEmail);
+            return List.of();
+        }
+
+        log.info("Instructor department: {}, fetching available courses", departmentName);
+
+        List<Course> courses = courseRepository.findByDepartmentAndStatus(departmentName, CourseStatus.OPEN);
+        return courses.stream()
                 .map(courseMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }

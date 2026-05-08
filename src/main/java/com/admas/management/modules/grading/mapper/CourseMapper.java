@@ -1,5 +1,7 @@
 package com.admas.management.modules.grading.mapper;
 
+import com.admas.management.modules.department.model.Department;
+import com.admas.management.modules.department.repository.DepartmentRepository;
 import com.admas.management.modules.grading.dto.request.CourseRequestDTO;
 import com.admas.management.modules.grading.dto.response.CourseResponseDTO;
 import com.admas.management.modules.grading.model.entity.Course;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class CourseMapper {
 
     private final UserRepository userRepository;
+    private final DepartmentRepository departmentRepository;  // Add this
 
     public Course toEntity(CourseRequestDTO dto) {
         Course course = new Course();
@@ -21,7 +24,14 @@ public class CourseMapper {
         course.setCourseName(dto.getCourseName());
         course.setDescription(dto.getDescription());
         course.setCredits(dto.getCredits());
-        course.setDepartment(dto.getDepartment());
+
+        // Fix: Convert String department name to Department object
+        if (dto.getDepartment() != null && !dto.getDepartment().isEmpty()) {
+            Department department = departmentRepository.findByName(dto.getDepartment())
+                    .orElseThrow(() -> new RuntimeException("Department not found: " + dto.getDepartment()));
+            course.setDepartment(department);
+        }
+
         course.setFaculty(dto.getFaculty());
         course.setSemester(dto.getSemester());
         course.setAcademicYear(dto.getAcademicYear());
@@ -33,6 +43,8 @@ public class CourseMapper {
         course.setSyllabus(dto.getSyllabus());
         course.setRoom(dto.getRoom());
         course.setSchedule(dto.getSchedule());
+
+        // Set instructor name if email exists
         if (dto.getInstructorEmail() != null) {
             userRepository.findByEmail(dto.getInstructorEmail()).ifPresent(instructor ->
                     course.setInstructorName(instructor.getFullName())
@@ -49,7 +61,7 @@ public class CourseMapper {
                 .courseName(course.getCourseName())
                 .description(course.getDescription())
                 .credits(course.getCredits())
-                .department(course.getDepartment())
+                .department(course.getDepartment() != null ? course.getDepartment().getName() : null)
                 .faculty(course.getFaculty())
                 .semester(course.getSemester())
                 .academicYear(course.getAcademicYear())
@@ -72,7 +84,14 @@ public class CourseMapper {
         if (dto.getCourseName() != null) course.setCourseName(dto.getCourseName());
         if (dto.getDescription() != null) course.setDescription(dto.getDescription());
         if (dto.getCredits() != null) course.setCredits(dto.getCredits());
-        if (dto.getDepartment() != null) course.setDepartment(dto.getDepartment());
+
+        // Fix: Handle department update - convert String to Department object
+        if (dto.getDepartment() != null && !dto.getDepartment().isEmpty()) {
+            Department department = departmentRepository.findByName(dto.getDepartment())
+                    .orElseThrow(() -> new RuntimeException("Department not found: " + dto.getDepartment()));
+            course.setDepartment(department);
+        }
+
         if (dto.getFaculty() != null) course.setFaculty(dto.getFaculty());
         if (dto.getSemester() != null) course.setSemester(dto.getSemester());
         if (dto.getAcademicYear() != null) course.setAcademicYear(dto.getAcademicYear());

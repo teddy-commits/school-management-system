@@ -1,6 +1,7 @@
 package com.admas.management.modules.registration.dto;
 
 import com.admas.management.modules.shared.model.Role;
+import com.admas.management.modules.shared.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +36,15 @@ public class UserResponse {
 
     private String permissions;
 
-    public static UserResponse fromUser(com.admas.management.modules.shared.model.User user) {
+    public static UserResponse fromUser(User user) {
+        // Get department name safely
+        String departmentName = null;
+        if (user.getDepartment() != null) {
+            departmentName = user.getDepartment().getName();
+        } else if (user.getDepartmentName() != null) {
+            departmentName = user.getDepartmentName();
+        }
+
         return UserResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
@@ -44,7 +53,7 @@ public class UserResponse {
                 .employeeId(user.getEmployeeId())
                 .primaryRole(user.getRole())
                 .additionalRoles(user.getAdditionalRoles())
-                .department(user.getDepartment())
+                .department(departmentName)  // Now using the variable
                 .faculty(user.getFaculty())
                 .designation(user.getDesignation())
                 .phoneNumber(user.getPhoneNumber())
@@ -58,7 +67,7 @@ public class UserResponse {
                 .build();
     }
 
-    private static String determineUserType(com.admas.management.modules.shared.model.User user) {
+    private static String determineUserType(User user) {
         if (user.isStudent()) return "Student";
         if (user.isInstructor()) return "Instructor";
         if (user.isAcademicAdministrator()) return "Academic Administrator";

@@ -1,6 +1,6 @@
 package com.admas.management.modules.grading.model.entity;
 
-
+import com.admas.management.modules.department.model.Department;
 import com.admas.management.modules.grading.model.enums.CourseStatus;
 import com.admas.management.modules.grading.model.enums.Semester;
 import jakarta.persistence.*;
@@ -40,7 +40,11 @@ public class Course {
 
     private Integer credits;
 
-    private String department;
+    // Department Relationship (Foreign Key)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
     private String faculty;
 
     @Enumerated(EnumType.STRING)
@@ -74,6 +78,16 @@ public class Course {
 
     @OneToMany(mappedBy = "course")
     private Set<Grade> grades = new HashSet<>();
+
+    // Helper methods - DO NOT add getDepartment() that returns String
+    // Use these instead:
+    public String getDepartmentName() {
+        return department != null ? department.getName() : null;
+    }
+
+    public Long getDepartmentId() {
+        return department != null ? department.getId() : null;
+    }
 
     public boolean hasAvailableSeats() {
         return enrolledStudents < maxStudents;

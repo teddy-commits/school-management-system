@@ -79,10 +79,18 @@ public class GPACalculatorService {
 
         double overallCGPA = calculateStudentCGPA(student.getId());
 
+        // Get department name safely
+        String departmentName = null;
+        if (student.getDepartment() != null) {
+            departmentName = student.getDepartment().getName();
+        } else if (student.getDepartmentName() != null) {
+            departmentName = student.getDepartmentName();
+        }
+
         return TranscriptResponseDTO.builder()
                 .studentId(student.getStudentId())
                 .studentName(student.getFullName())
-                .department(student.getDepartment())
+                .department(departmentName)  // Now passing String
                 .faculty(student.getFaculty())
                 .overallCGPA(overallCGPA)
                 .totalCreditsEarned(totalCreditsEarned)
