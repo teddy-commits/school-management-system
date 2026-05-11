@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.admas.management.modules.department.repository.DepartmentRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,17 +26,26 @@ public class StudentRegistrationServiceImpl implements StudentRegistrationServic
     private final UserRepository userRepository;
     private final StudentMapper studentMapper;
     private final StudentValidator studentValidator;
+    private final DepartmentRepository departmentRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
     @Override
     public StudentRegistrationResponse registerStudent(StudentRegistrationRequest request) {
         List<String> errors = studentValidator.validateStudentRegistration(request);
         if (!errors.isEmpty()) {
             throw new RuntimeException("Validation failed: " + String.join(", ", errors));
         }
+
+        // Verify department exists
+        if (request.getDepartmentId() != null) {
+            departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));
+        }
+
         User user = studentMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStudentId(generateStudentId());
+        user.setAcademicYearLevel(1);  // Explicitly set to 1 for new students
+
         User savedUser = userRepository.save(user);
         return studentMapper.toRegistrationResponse(savedUser, "Student registered successfully. Student ID: " + savedUser.getStudentId());
     }

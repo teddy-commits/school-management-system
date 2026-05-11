@@ -27,6 +27,7 @@ public class SemesterRegistrationResponseDTO {
     private Double feesDue;
     private String paymentReference;
     private List<CourseEnrollmentDTO> courses;
+    private Integer academicYearLevel;
     private String message;
 
     @Data

@@ -24,6 +24,7 @@ public class StudentProfileResponse {
     private String department;
     private String faculty;
     private Integer enrollmentYear;
+    private Integer academicYearLevel;  // NEW
     private Double cgpa;
     private String currentSemester;
     private Integer totalCredits;

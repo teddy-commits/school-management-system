@@ -18,7 +18,7 @@ public class StudentUpdateRequest {
     private String phoneNumber;
 
     private String address;
-    private String department;
+    private Long departmentId;  // Changed from String department to Long departmentId
     private String faculty;
 
     @Min(value = 2000, message = "Enrollment year must be 2000 or later")

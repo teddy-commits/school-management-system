@@ -62,13 +62,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Set<Role> additionalRoles = new HashSet<>();
 
-    // Department Relationship (Foreign Key)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
-    private Department department;  // This is the relationship field
+    private Department department;
 
-    // For backward compatibility - keep as transient or remove
-    @Transient  // This won't be stored in database
+    @Transient
     private String departmentName;
 
     private String faculty;
@@ -77,6 +75,9 @@ public class User {
     private Integer graduationYear;
     private String currentSemester;
     private Double cgpa;
+
+    // NEW: Academic Year Level (1, 2, 3, 4, 5)
+    private Integer academicYearLevel;
 
     @Enumerated(EnumType.STRING)
     private StudentType studentType;
@@ -128,7 +129,6 @@ public class User {
         return email;
     }
 
-    // Helper method to get department name safely
     public String getDepartmentName() {
         if (department != null) {
             return department.getName();

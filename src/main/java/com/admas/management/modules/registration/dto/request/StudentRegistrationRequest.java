@@ -27,9 +27,7 @@ public class StudentRegistrationRequest {
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
-            message = "Password must contain at least one digit, one lowercase, one uppercase, and one special character")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
     @NotBlank(message = "Phone number is required")
@@ -38,8 +36,8 @@ public class StudentRegistrationRequest {
 
     private String address;
 
-    @NotBlank(message = "Department is required")
-    private String department;
+    @NotNull(message = "Department ID is required")
+    private Long departmentId;
 
     @NotBlank(message = "Faculty is required")
     private String faculty;
@@ -55,4 +53,5 @@ public class StudentRegistrationRequest {
     private LocalDate dateOfBirth;
     private String nationality;
     private String emergencyContact;
+
 }

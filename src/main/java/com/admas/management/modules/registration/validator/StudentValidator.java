@@ -1,5 +1,6 @@
 package com.admas.management.modules.registration.validator;
 
+import com.admas.management.modules.department.repository.DepartmentRepository;
 import com.admas.management.modules.registration.dto.request.StudentRegistrationRequest;
 import com.admas.management.modules.shared.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.List;
 public class StudentValidator {
 
     private final UserRepository userRepository;
+    private final DepartmentRepository departmentRepository;  // Add this
 
     public List<String> validateStudentRegistration(StudentRegistrationRequest request) {
         List<String> errors = new ArrayList<>();
@@ -32,38 +34,23 @@ public class StudentValidator {
             errors.add("Enrollment year is too old. Maximum 5 years ago.");
         }
 
-        // Validate department
-        if (!isValidDepartment(request.getDepartment())) {
-            errors.add("Invalid department: " + request.getDepartment());
+        // Validate department exists in database
+        if (request.getDepartmentId() == null) {
+            errors.add("Department is required");
+        } else if (!departmentRepository.existsById(request.getDepartmentId())) {
+            errors.add("Invalid department selected. Department not found in the system.");
         }
 
-        // Validate faculty
-        if (!isValidFaculty(request.getFaculty())) {
+        // Faculty validation is optional since it will be auto-filled from department
+        // But keep for backward compatibility
+        if (request.getFaculty() != null && !isValidFaculty(request.getFaculty())) {
             errors.add("Invalid faculty: " + request.getFaculty());
         }
 
         return errors;
     }
 
-    private boolean isValidDepartment(String department) {
-        // Add your university's departments
-        List<String> validDepartments = List.of(
-                "Computer Science",
-                "Software Engineering",
-                "Information Technology",
-                "Electrical Engineering",
-                "Mechanical Engineering",
-                "Civil Engineering",
-                "Business Administration",
-                "Economics",
-                "Mathematics",
-                "Physics",
-                "Chemistry",
-                "Biology"
-        );
-        return validDepartments.contains(department);
-    }
-
+    // Optional: Keep for backward compatibility, but not used for new validation
     private boolean isValidFaculty(String faculty) {
         // Add your university's faculties
         List<String> validFaculties = List.of(
