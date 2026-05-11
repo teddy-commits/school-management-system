@@ -1,6 +1,7 @@
 package com.admas.management.modules.grading.service;
 
-import com.admas.management.modules.grading.model.dto.request.CourseSectionRequestDTO;
+
+import com.admas.management.modules.grading.dto.request.CourseSectionRequestDTO;
 import com.admas.management.modules.grading.model.dto.response.CourseSectionResponseDTO;
 
 import java.util.List;

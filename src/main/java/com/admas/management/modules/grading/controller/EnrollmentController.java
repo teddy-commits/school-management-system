@@ -87,13 +87,13 @@ public class EnrollmentController {
     }
 
     // ========== Section-based Enrollment (New) ==========
-
     @PostMapping("/section")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<StudentEnrollmentResponseDTO> enrollInSection(@Valid @RequestBody StudentEnrollmentRequestDTO request) {
-        if (!securityService.isStudentOwner(request.getStudentId())) {
-            throw new RuntimeException("Access denied");
-        }
+        // Remove the student owner check for admin roles
+        // Only check if the user is trying to enroll themselves when they are a student
+        // For ADMIN and ACADEMIC_ADMINISTRATOR, they can enroll any student
+
         StudentEnrollmentResponseDTO response = studentEnrollmentService.enrollStudent(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

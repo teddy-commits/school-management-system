@@ -30,49 +30,32 @@ import java.util.stream.Collectors;
 public class AdminUserServiceImpl implements AdminUserService {
 
     private final UserRepository userRepository;
-    private final DepartmentRepository departmentRepository;  // Add this
+    private final DepartmentRepository departmentRepository;
     private final AdminUserMapper adminUserMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserRegistrationResponse createUser(AdminUserCreationRequest request) {
         log.info("Creating new user with role: {}", request.getRole());
-
-        // Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered: " + request.getEmail());
         }
 
-        // Validate department ONLY for INSTRUCTOR role
-        // Remove the check for academic administrators
         if (request.getRole() == Role.INSTRUCTOR && request.getDepartmentId() == null) {
             throw new RuntimeException("Department is required for instructors");
         }
-
-        // Verify department exists only if provided (for any role)
         if (request.getDepartmentId() != null) {
             Department department = departmentRepository.findById(request.getDepartmentId())
                     .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));
         }
 
-        // Map request to User entity
         User user = adminUserMapper.toEntity(request);
-
-        // Encode password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        // Generate employee ID
         user.setEmployeeId(generateEmployeeId());
-
-        // Set joining date if not provided
         if (user.getJoiningDate() == null) {
             user.setJoiningDate(LocalDateTime.now());
         }
-
-        // Set active status
         user.setIsActive(true);
-
-        // Save user
         User savedUser = userRepository.save(user);
 
         String message = String.format("%s created successfully with Employee ID: %s",
@@ -103,14 +86,10 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-
-        // If department ID is being updated, verify department exists
         if (request.getDepartmentId() != null) {
             Department department = departmentRepository.findById(request.getDepartmentId())
                     .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));
         }
-
-        // Use mapper for updates to handle department relationship
         adminUserMapper.updateEntityFromRequest(user, request);
 
         User updatedUser = userRepository.save(user);

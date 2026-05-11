@@ -1,4 +1,4 @@
-package com.admas.management.modules.grading.model.dto.request;
+package com.admas.management.modules.grading.dto.request;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;

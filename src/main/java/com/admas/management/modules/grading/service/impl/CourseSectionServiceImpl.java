@@ -1,6 +1,6 @@
 package com.admas.management.modules.grading.service.impl;
 
-import com.admas.management.modules.grading.model.dto.request.CourseSectionRequestDTO;
+import com.admas.management.modules.grading.dto.request.CourseSectionRequestDTO;
 import com.admas.management.modules.grading.model.dto.response.CourseSectionResponseDTO;
 import com.admas.management.modules.grading.model.entity.Course;
 import com.admas.management.modules.grading.model.entity.CourseSection;

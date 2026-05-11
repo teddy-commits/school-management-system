@@ -1,6 +1,6 @@
 package com.admas.management.modules.grading.controller;
 
-import com.admas.management.modules.grading.model.dto.request.CourseSectionRequestDTO;
+import com.admas.management.modules.grading.dto.request.CourseSectionRequestDTO;
 import com.admas.management.modules.grading.model.dto.response.CourseSectionResponseDTO;
 import com.admas.management.modules.grading.service.CourseSectionService;
 import jakarta.validation.Valid;
@@ -34,6 +34,17 @@ public class CourseSectionController {
     public ResponseEntity<List<CourseSectionResponseDTO>> getAllSections() {
         // You need to implement this in service
         List<CourseSectionResponseDTO> sections = sectionService.getAllSections();
+        return ResponseEntity.ok(sections);
+    }
+    // Add this method to your CourseSectionController
+
+    // Get sections by semester and academic year
+    @GetMapping("/semester")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR', 'MANAGEMENT')")
+    public ResponseEntity<List<CourseSectionResponseDTO>> getSectionsBySemester(
+            @RequestParam String semester,
+            @RequestParam Integer academicYear) {
+        List<CourseSectionResponseDTO> sections = sectionService.getSectionsBySemester(semester, academicYear);
         return ResponseEntity.ok(sections);
     }
 
