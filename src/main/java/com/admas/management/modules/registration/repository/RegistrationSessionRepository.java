@@ -17,11 +17,16 @@ public interface RegistrationSessionRepository extends JpaRepository<Registratio
 
     List<RegistrationSession> findByIsActiveTrue();
 
-    @Query("SELECT rs FROM RegistrationSession rs WHERE rs.startDate <= :now AND rs.endDate >= :now AND rs.isActive = true")
+    // Fix: Use proper date comparison
+    @Query("SELECT rs FROM RegistrationSession rs WHERE rs.isActive = true AND rs.startDate <= :now AND rs.endDate >= :now")
     Optional<RegistrationSession> findCurrentOpenSession(@Param("now") LocalDateTime now);
 
-    @Query("SELECT rs FROM RegistrationSession rs WHERE rs.startDate > :now AND rs.isActive = true")
+    @Query("SELECT rs FROM RegistrationSession rs WHERE rs.startDate > :now AND rs.isActive = true ORDER BY rs.startDate ASC")
     List<RegistrationSession> findUpcomingSessions(@Param("now") LocalDateTime now);
 
     boolean existsBySemesterAndAcademicYear(String semester, Integer academicYear);
+
+    // Add this for debugging
+    @Query("SELECT rs FROM RegistrationSession rs WHERE rs.isActive = true")
+    List<RegistrationSession> findAllActiveSessions();
 }

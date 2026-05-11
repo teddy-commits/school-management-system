@@ -17,6 +17,7 @@ public class CourseSectionResponseDTO {
     private String courseCode;
     private String courseName;
     private String sectionCode;
+    private Integer academicYearLevel;
     private String semester;
     private Integer academicYear;
     private Long instructorId;
@@ -28,6 +29,7 @@ public class CourseSectionResponseDTO {
     private String room;
     private String status;
     private Boolean hasAvailableSeats;
+    private String formattedSectionName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String message;

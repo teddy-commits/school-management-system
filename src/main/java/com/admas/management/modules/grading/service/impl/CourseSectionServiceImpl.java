@@ -47,6 +47,7 @@ public class CourseSectionServiceImpl implements CourseSectionService {
         CourseSection section = new CourseSection();
         section.setCourse(course);
         section.setSectionCode(request.getSectionCode().toUpperCase());
+        section.setAcademicYearLevel(request.getAcademicYearLevel()); // IMPORTANT: Set this!
         section.setSemester(request.getSemester());
         section.setAcademicYear(request.getAcademicYear());
         section.setMaxStudents(request.getMaxStudents() != null ? request.getMaxStudents() : 40);
@@ -64,7 +65,6 @@ public class CourseSectionServiceImpl implements CourseSectionService {
         CourseSection saved = sectionRepository.save(section);
         return mapToResponseDTO(saved, "Section created successfully");
     }
-
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public CourseSectionResponseDTO updateSection(Long id, CourseSectionRequestDTO request) {
@@ -181,6 +181,7 @@ public class CourseSectionServiceImpl implements CourseSectionService {
                 .courseCode(section.getCourse().getCourseCode())
                 .courseName(section.getCourse().getCourseName())
                 .sectionCode(section.getSectionCode())
+                .academicYearLevel(section.getAcademicYearLevel())
                 .semester(section.getSemester())
                 .academicYear(section.getAcademicYear())
                 .instructorId(section.getInstructor() != null ? section.getInstructor().getId() : null)
@@ -192,6 +193,7 @@ public class CourseSectionServiceImpl implements CourseSectionService {
                 .room(section.getRoom())
                 .status(section.getStatus().name())
                 .hasAvailableSeats(section.hasAvailableSeats())
+                .formattedSectionName(section.getFormattedSectionName())
                 .createdAt(section.getCreatedAt())
                 .updatedAt(section.getUpdatedAt())
                 .message(message != null ? message : "Section retrieved successfully")

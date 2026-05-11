@@ -63,6 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean shouldSkipAuthentication(String path) {
         return path.contains("/api/v1/auth/login") ||
                 path.contains("/api/v1/registration/students/register") ||
+                path.contains("/api/v1/registration/sessions/debug/check")||
                 path.contains("/public/") ||
                 path.contains("/health") ||
                 path.contains("/test/") ||

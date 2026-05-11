@@ -33,10 +33,13 @@ public class CourseSection {
     private String sectionCode; // 'A', 'B', '01', '02'
 
     @Column(nullable = false)
+    private Integer academicYearLevel; // 1, 2, 3, 4, 5 - NEW: Year of study
+
+    @Column(nullable = false)
     private String semester; // FALL, SPRING, SUMMER
 
     @Column(nullable = false)
-    private Integer academicYear;
+    private Integer academicYear; // 2024, 2025, etc.
 
     @ManyToOne
     @JoinColumn(name = "instructor_id")
@@ -82,5 +85,13 @@ public class CourseSection {
         if (this.enrolledStudents < maxStudents && this.status == SectionStatus.FULL) {
             this.status = SectionStatus.OPEN;
         }
+    }
+
+    // Helper method to get formatted section name (e.g., "CS101 - Year 3 Section A")
+    public String getFormattedSectionName() {
+        return String.format("%s - Year %d Section %s",
+                course != null ? course.getCourseCode() : "N/A",
+                academicYearLevel,
+                sectionCode);
     }
 }

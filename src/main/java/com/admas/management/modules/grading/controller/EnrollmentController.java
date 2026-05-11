@@ -29,8 +29,6 @@ public class EnrollmentController {
     private final SecurityService securityService;
     private final UserRepository userRepository;
 
-    // ========== Course-based Enrollment (Legacy) ==========
-
     @PostMapping("/course")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<EnrollmentResponseDTO> enrollInCourse(@Valid @RequestBody EnrollmentRequestDTO requestDTO) {
@@ -91,7 +89,7 @@ public class EnrollmentController {
     // ========== Section-based Enrollment (New) ==========
 
     @PostMapping("/section")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<StudentEnrollmentResponseDTO> enrollInSection(@Valid @RequestBody StudentEnrollmentRequestDTO request) {
         if (!securityService.isStudentOwner(request.getStudentId())) {
             throw new RuntimeException("Access denied");
@@ -101,7 +99,7 @@ public class EnrollmentController {
     }
 
     @DeleteMapping("/section/{enrollmentId}")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
+    @PreAuthorize("hasAnyRole( 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<StudentEnrollmentResponseDTO> dropSection(@PathVariable Long enrollmentId) {
         StudentEnrollmentResponseDTO response = studentEnrollmentService.dropCourse(enrollmentId);
         return ResponseEntity.ok(response);

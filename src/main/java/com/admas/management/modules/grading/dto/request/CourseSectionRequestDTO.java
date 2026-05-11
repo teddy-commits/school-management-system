@@ -19,6 +19,11 @@ public class CourseSectionRequestDTO {
     @Size(min = 1, max = 10, message = "Section code must be between 1 and 10 characters")
     private String sectionCode;
 
+    @NotNull(message = "Academic year level is required")
+    @Min(value = 1, message = "Academic year level must be between 1 and 5")
+    @Max(value = 5, message = "Academic year level must be between 1 and 5")
+    private Integer academicYearLevel;  // Make sure this exists
+
     @NotBlank(message = "Semester is required")
     private String semester;
 
