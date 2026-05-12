@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CourseSectionRequestDTO {
 
-    @NotNull(message = "Course ID is required")
-    private Long courseId;
+    @NotNull(message = "Department ID is required")
+    private Long departmentId;
 
     @NotBlank(message = "Section code is required")
     @Size(min = 1, max = 10, message = "Section code must be between 1 and 10 characters")
@@ -22,7 +22,7 @@ public class CourseSectionRequestDTO {
     @NotNull(message = "Academic year level is required")
     @Min(value = 1, message = "Academic year level must be between 1 and 5")
     @Max(value = 5, message = "Academic year level must be between 1 and 5")
-    private Integer academicYearLevel;  // Make sure this exists
+    private Integer academicYearLevel;
 
     @NotBlank(message = "Semester is required")
     private String semester;
@@ -30,13 +30,9 @@ public class CourseSectionRequestDTO {
     @NotNull(message = "Academic year is required")
     private Integer academicYear;
 
-    private Long instructorId;
-
     @Min(value = 5, message = "Minimum 5 students per section")
     @Max(value = 100, message = "Maximum 100 students per section")
     private Integer maxStudents = 40;
 
-    private String schedule;
-    private String room;
     private String status;
 }

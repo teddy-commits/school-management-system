@@ -1,5 +1,6 @@
 package com.admas.management.modules.grading.model.entity;
 
+import com.admas.management.modules.department.model.Department;
 import com.admas.management.modules.shared.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,15 +26,21 @@ public class CourseSection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id", nullable = false)
+    // Department relationship (NEW - replaces course requirement)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
+
+    // Course relationship (optional - can be null initially)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id")
     private Course course;
 
     @Column(nullable = false)
     private String sectionCode; // 'A', 'B', '01', '02'
 
     @Column(nullable = false)
-    private Integer academicYearLevel; // 1, 2, 3, 4, 5 - NEW: Year of study
+    private Integer academicYearLevel; // 1, 2, 3, 4, 5
 
     @Column(nullable = false)
     private String semester; // FALL, SPRING, SUMMER
@@ -62,7 +69,40 @@ public class CourseSection {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+// Add these to CourseSection.java
 
+    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL)
+    private Set<SectionInstructor> sectionInstructors = new HashSet<>();
+
+    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL)
+    private Set<SectionCourse> sectionCourses = new HashSet<>();
+
+    // Helper methods
+    public void addInstructor(User instructor, Course course) {
+        SectionInstructor si = new SectionInstructor();
+        si.setSection(this);
+        si.setInstructor(instructor);
+        si.setCourse(course);
+        sectionInstructors.add(si);
+    }
+
+    public void addCourse(Course course, String schedule, String room) {
+        SectionCourse sc = new SectionCourse();
+        sc.setSection(this);
+        sc.setCourse(course);
+        sc.setSchedule(schedule);
+        sc.setRoom(room);
+        sc.setCredits(course.getCredits());
+        sectionCourses.add(sc);
+    }
+
+    public boolean canAddInstructor() {
+        return sectionInstructors.size() < 7;  // Max 7 instructors
+    }
+
+    public boolean canAddCourse() {
+        return sectionCourses.size() < 7;  // Max 7 courses
+    }
     public enum SectionStatus {
         OPEN, CLOSED, FULL, CANCELLED
     }
@@ -87,10 +127,10 @@ public class CourseSection {
         }
     }
 
-    // Helper method to get formatted section name (e.g., "CS101 - Year 3 Section A")
+    // Helper method to get formatted section name
     public String getFormattedSectionName() {
         return String.format("%s - Year %d Section %s",
-                course != null ? course.getCourseCode() : "N/A",
+                department != null ? department.getCode() : "N/A",
                 academicYearLevel,
                 sectionCode);
     }

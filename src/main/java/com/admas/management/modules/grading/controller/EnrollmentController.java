@@ -17,7 +17,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/grading/enrollments")
@@ -97,7 +99,41 @@ public class EnrollmentController {
         StudentEnrollmentResponseDTO response = studentEnrollmentService.enrollStudent(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+    // In your enrollment controller
+    @PostMapping("/section/{sectionId}/student/{studentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
+    public ResponseEntity<Map<String, String>> enrollStudentInSection(
+            @PathVariable Long sectionId,
+            @PathVariable Long studentId,
+            @RequestParam String semester,
+            @RequestParam Integer academicYear) {
 
+        enrollmentService.enrollStudentInSection(studentId, sectionId, semester, academicYear);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Student enrolled in all section courses successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/course/{courseId}/students")
+    public ResponseEntity<List<EnrollmentResponseDTO>> getStudentsByCourse(
+            @PathVariable Long courseId,
+            @RequestParam String semester,
+            @RequestParam Integer academicYear,
+            @RequestParam(required = false) Long sectionId) {  // ✅ Add sectionId param
+
+        List<EnrollmentResponseDTO> students;
+
+        if (sectionId != null) {
+            // Filter by course AND section
+            students = enrollmentService.getEnrollmentsByCourseAndSection(courseId, sectionId, semester, academicYear);
+        } else {
+            // Fallback to just course (backward compatibility)
+            students = enrollmentService.getEnrollmentsByCourseAndSemester(courseId, semester, academicYear);
+        }
+
+        return ResponseEntity.ok(students);
+    }
     @DeleteMapping("/section/{enrollmentId}")
     @PreAuthorize("hasAnyRole( 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<StudentEnrollmentResponseDTO> dropSection(@PathVariable Long enrollmentId) {

@@ -21,7 +21,8 @@ public interface StudentEnrollmentRepository extends JpaRepository<StudentEnroll
     boolean existsByStudentIdAndSectionId(Long studentId, Long sectionId);
 
     long countBySectionId(Long sectionId);
-
+    List<StudentEnrollment> findByStudentIdAndSection_SemesterAndSection_AcademicYear(
+            Long studentId, String semester, Integer academicYear);
     @Query("SELECT se FROM StudentEnrollment se WHERE se.section.instructor.id = :instructorId AND se.section.semester = :semester AND se.section.academicYear = :year")
     List<StudentEnrollment> findStudentsByInstructorAndSemester(@Param("instructorId") Long instructorId,
                                                                 @Param("semester") String semester,

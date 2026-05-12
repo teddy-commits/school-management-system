@@ -19,7 +19,16 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     // Fix: Find by department name (since department is now an object relationship)
     @Query("SELECT c FROM Course c WHERE c.department.name = :departmentName")
     List<Course> findByDepartment(@Param("departmentName") String departmentName);
-
+    @Query("SELECT DISTINCT sc.course FROM SectionCourse sc " +
+            "JOIN SectionInstructor si ON sc.section.id = si.section.id " +
+            "WHERE si.instructor.email = :instructorEmail " +
+            "AND sc.section.semester = :semester " +
+            "AND sc.section.academicYear = :academicYear")
+    List<Course> findCoursesByInstructorEmail(
+            @Param("instructorEmail") String instructorEmail,
+            @Param("semester") String semester,
+            @Param("academicYear") Integer academicYear
+    );
     List<Course> findByFaculty(String faculty);
     List<Course> findBySemester(Semester semester);
     List<Course> findByAcademicYear(Integer year);

@@ -1,4 +1,4 @@
-package com.admas.management.modules.grading.dto.request;
+package com.admas.management.modules.grading.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +13,7 @@ public class SectionCourseDetailDTO {
     private Long id;
     private String courseCode;
     private String courseName;
+    private Long sectionId;
     private Integer credits;
     private String status;
     private String schedule;

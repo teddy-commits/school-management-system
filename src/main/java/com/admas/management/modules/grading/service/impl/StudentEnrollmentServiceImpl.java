@@ -3,8 +3,10 @@ package com.admas.management.modules.grading.service.impl;
 import com.admas.management.modules.grading.dto.request.StudentEnrollmentRequestDTO;
 import com.admas.management.modules.grading.dto.response.StudentEnrollmentResponseDTO;
 import com.admas.management.modules.grading.model.entity.CourseSection;
+import com.admas.management.modules.grading.model.entity.SectionCourse;
 import com.admas.management.modules.grading.model.entity.StudentEnrollment;
 import com.admas.management.modules.grading.repository.CourseSectionRepository;
+import com.admas.management.modules.grading.repository.SectionCourseRepository;
 import com.admas.management.modules.grading.repository.StudentEnrollmentRepository;
 import com.admas.management.modules.grading.service.StudentEnrollmentService;
 import com.admas.management.modules.shared.model.User;
@@ -27,10 +29,11 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
     private final StudentEnrollmentRepository enrollmentRepository;
     private final CourseSectionRepository sectionRepository;
+    private final SectionCourseRepository sectionCourseRepository;
     private final UserRepository userRepository;
 
     @Override
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public StudentEnrollmentResponseDTO enrollStudent(StudentEnrollmentRequestDTO request) {
         log.info("Enrolling student {} in section {}", request.getStudentId(), request.getSectionId());
 
@@ -55,6 +58,12 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
             throw new RuntimeException("Section is not open for registration");
         }
 
+        // Get courses in this section for the response
+        List<SectionCourse> sectionCourses = sectionCourseRepository.findBySectionId(section.getId());
+        String courseInfo = sectionCourses.stream()
+                .map(sc -> sc.getCourse().getCourseCode())
+                .collect(Collectors.joining(", "));
+
         StudentEnrollment enrollment = new StudentEnrollment();
         enrollment.setStudent(student);
         enrollment.setSection(section);
@@ -67,11 +76,13 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         section.incrementEnrolledStudents();
         sectionRepository.save(section);
 
-        return mapToResponseDTO(saved, "Successfully enrolled in " + section.getCourse().getCourseCode() + " Section " + section.getSectionCode());
+        return mapToResponseDTO(saved,
+                String.format("Successfully enrolled in section %s. Courses: %s",
+                        section.getSectionCode(), courseInfo));
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public StudentEnrollmentResponseDTO dropCourse(Long enrollmentId) {
         log.info("Dropping enrollment: {}", enrollmentId);
 
@@ -86,7 +97,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         section.decrementEnrolledStudents();
         sectionRepository.save(section);
 
-        return mapToResponseDTO(updated, "Successfully dropped the course");
+        return mapToResponseDTO(updated, "Successfully dropped from section");
     }
 
     @Override
@@ -149,23 +160,30 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
     private StudentEnrollmentResponseDTO mapToResponseDTO(StudentEnrollment enrollment, String message) {
         CourseSection section = enrollment.getSection();
+
+        // Get courses in this section
+        List<SectionCourse> sectionCourses = sectionCourseRepository.findBySectionId(section.getId());
+        String courseInfo = sectionCourses.stream()
+                .map(sc -> sc.getCourse().getCourseCode())
+                .collect(Collectors.joining(", "));
+
         return StudentEnrollmentResponseDTO.builder()
                 .id(enrollment.getId())
                 .studentId(enrollment.getStudent().getId())
                 .studentName(enrollment.getStudent().getFullName())
                 .studentIdNumber(enrollment.getStudent().getStudentId())
                 .sectionId(section.getId())
-                .courseCode(section.getCourse().getCourseCode())
-                .courseName(section.getCourse().getCourseName())
+                .courseCode(courseInfo)  // Now shows all courses in section
+                .courseName("Multiple Courses")  // Or combine course names
                 .sectionCode(section.getSectionCode())
-                .instructorName(section.getInstructor() != null ? section.getInstructor().getFullName() : null)
+                .instructorName(section.getInstructor() != null ? section.getInstructor().getFullName() : "TBA")
                 .schedule(section.getSchedule())
                 .room(section.getRoom())
                 .enrollmentDate(enrollment.getEnrollmentDate())
                 .status(enrollment.getStatus().name())
                 .semester(section.getSemester())
                 .academicYear(section.getAcademicYear())
-                .message(message != null ? message : "Enrollment retrieved successfully")
+                .message(message != null ? message : "Enrollment processed successfully")
                 .build();
     }
 }

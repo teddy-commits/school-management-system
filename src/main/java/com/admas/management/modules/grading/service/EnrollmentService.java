@@ -13,4 +13,8 @@ public interface EnrollmentService {
     List<EnrollmentResponseDTO> getActiveEnrollmentsByStudent(Long studentId);
     Long getEnrollmentCountByCourse(String courseCode);
     boolean isStudentEnrolled(Long studentId, String courseCode);
+    // Add to EnrollmentService interface
+    void enrollStudentInSection(Long studentId, Long sectionId, String semester, Integer academicYear);
+    List<EnrollmentResponseDTO> getEnrollmentsByCourseAndSemester(Long courseId, String semester, Integer academicYear);
+    List<EnrollmentResponseDTO> getEnrollmentsByCourseAndSection(Long courseId, Long sectionId, String semester, Integer academicYear);
 }

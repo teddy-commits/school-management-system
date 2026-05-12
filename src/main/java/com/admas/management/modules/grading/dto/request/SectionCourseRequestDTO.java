@@ -1,6 +1,5 @@
-package com.admas.management.modules.grading.model.dto.request;
+package com.admas.management.modules.grading.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,8 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SectionCourseRequestDTO {
-    @NotNull(message = "Section ID is required")
-    private Long sectionId;
+
+    // Remove sectionId - it comes from URL path
+    // @NotNull(message = "Section ID is required")
+    // private Long sectionId;
 
     @NotNull(message = "Course ID is required")
     private Long courseId;
