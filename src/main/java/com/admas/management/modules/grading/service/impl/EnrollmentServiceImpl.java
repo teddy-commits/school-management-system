@@ -129,60 +129,44 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        // ✅ CHECK: Is student already enrolled in ANY section for this semester/year?
+        // Check existing section enrollment
         List<StudentEnrollment> existingEnrollments = studentEnrollmentRepository
                 .findByStudentIdAndSection_SemesterAndSection_AcademicYear(studentId, semester, academicYear);
 
         if (!existingEnrollments.isEmpty()) {
-            CourseSection existingSection = existingEnrollments.get(0).getSection();
-            throw new RuntimeException(
-                    String.format("Student is already enrolled in Section %s for %s %d. A student can only be in one section per semester.",
-                            existingSection.getSectionCode(), semester, academicYear)
-            );
+            throw new RuntimeException("Student already enrolled in another section");
         }
 
-        // ✅ CHECK: Is student already enrolled in any course for this semester?
-        long courseCount = enrollmentRepository
-                .countByStudentIdAndSemesterAndAcademicYear(studentId, semester, academicYear);
+        // ❌ REMOVED course count check here
 
-        if (courseCount > 0) {
-            throw new RuntimeException(
-                    String.format("Student is already enrolled in %d course(s) for %s %d. Cannot enroll in another section.",
-                            courseCount, semester, academicYear)
-            );
-        }
-
-        // Check if section has available seats
         if (!section.hasAvailableSeats()) {
-            throw new RuntimeException("No available seats in this section");
+            throw new RuntimeException("No available seats");
         }
 
-        // Check if section is open
-        if (section.getStatus() != CourseSection.SectionStatus.OPEN) {
-            throw new RuntimeException("Section is not open for registration");
-        }
-
-        // ✅ STEP 1: Create StudentEnrollment record (section-level)
+        // STEP 1: Create StudentEnrollment
         StudentEnrollment studentEnrollment = new StudentEnrollment();
         studentEnrollment.setStudent(student);
         studentEnrollment.setSection(section);
         studentEnrollment.setEnrollmentDate(LocalDateTime.now());
         studentEnrollment.setStatus(StudentEnrollment.EnrollmentStatus.ENROLLED);
         studentEnrollmentRepository.save(studentEnrollment);
-        log.info("Created StudentEnrollment for section {}", section.getSectionCode());
+        log.info("✅ Created StudentEnrollment for section {}", section.getSectionCode());
 
-        // ✅ STEP 2: Get all courses in this section
+        // STEP 2: Get courses
         List<SectionCourse> sectionCourses = sectionCourseRepository.findBySectionId(sectionId);
+        log.info("📚 Section {} has {} courses", section.getSectionCode(), sectionCourses.size());
 
         int enrolledCount = 0;
 
-        // ✅ STEP 3: Create Enrollment records for each course (course-level)
         for (SectionCourse sc : sectionCourses) {
             Course course = sc.getCourse();
+            log.info("🔍 Processing course: {} (ID: {})", course.getCourseCode(), course.getId());
 
             boolean alreadyEnrolled = enrollmentRepository
                     .existsByStudentAndCourseAndSemesterAndAcademicYear(
                             student, course, semester, academicYear);
+
+            log.info("   Already enrolled? {}", alreadyEnrolled);
 
             if (!alreadyEnrolled) {
                 Enrollment enrollment = new Enrollment();
@@ -195,15 +179,16 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
                 enrollmentRepository.save(enrollment);
                 enrolledCount++;
+                log.info("   ✅ Created Enrollment: Student {} in Course {}", student.getEmail(), course.getCourseCode());
+            } else {
+                log.warn("   ⚠️ Skipping - already enrolled");
             }
         }
 
-        // Update section count
         section.setEnrolledStudents(section.getEnrolledStudents() + 1);
         sectionRepository.save(section);
 
-        log.info("Enrolled student {} in section {} with {} course enrollments",
-                student.getEmail(), section.getSectionCode(), enrolledCount);
+        log.info("🎉 Enrolled student {} in {} courses", student.getEmail(), enrolledCount);
     }
     @Override
     @Transactional(readOnly = true)
