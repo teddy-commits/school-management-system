@@ -15,7 +15,11 @@ public class CorsConfig implements WebMvcConfigurer {
                         "http://localhost:5173",
                         "http://localhost:5174",
                         "http://127.0.0.1:3000",
-                        "http://127.0.0.1:5173"
+                        "http://127.0.0.1:5173",
+                        // ✅ Add your Vercel frontend URL
+                        "https://front-school-system.vercel.app",
+                        // ✅ Also add any custom domains you might use
+                        "https://front-school-system-git-main.vercel.app"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
