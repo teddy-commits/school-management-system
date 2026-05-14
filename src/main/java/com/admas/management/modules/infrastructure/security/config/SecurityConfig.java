@@ -1,6 +1,5 @@
 package com.admas.management.modules.infrastructure.security.config;
 
-
 import com.admas.management.modules.infrastructure.security.jwt.JwtAuthenticationFilter;
 import com.admas.management.modules.infrastructure.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -53,12 +52,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        // ✅ ADD YOUR VERCEL FRONTEND URL
         configuration.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:5173",
                 "http://localhost:5174",
                 "http://127.0.0.1:3000",
-                "http://127.0.0.1:5173"
+                "http://127.0.0.1:5173",
+                "https://front-school-system.vercel.app",        // Your Vercel frontend
+                "https://front-school-system-git-*.vercel.app",  // Vercel preview deployments
+                "https://*.vercel.app"                           // All Vercel deployments (optional)
         ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -88,7 +91,6 @@ public class SecurityConfig {
                                         "/error",
                                         "/registration/sessions/debug/check"
                                 ).permitAll()
-
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
