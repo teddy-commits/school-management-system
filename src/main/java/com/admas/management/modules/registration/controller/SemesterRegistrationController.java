@@ -18,13 +18,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/semester-registration")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class SemesterRegistrationController {
 
     private final SemesterRegistrationService registrationService;
     private final SecurityService securityService;
-
-    // Initiate semester registration (Student)
     @PostMapping("/initiate")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<SemesterRegistrationResponseDTO> initiateRegistration(
@@ -37,8 +34,6 @@ public class SemesterRegistrationController {
         SemesterRegistrationResponseDTO response = registrationService.initiateRegistration(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
-    // Add courses to existing registration
     @PostMapping("/{registrationId}/courses")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
     public ResponseEntity<SemesterRegistrationResponseDTO> addCourses(
@@ -49,7 +44,6 @@ public class SemesterRegistrationController {
         return ResponseEntity.ok(response);
     }
 
-    // Remove course from registration
     @DeleteMapping("/{registrationId}/courses/{courseId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
     public ResponseEntity<SemesterRegistrationResponseDTO> removeCourse(
@@ -60,15 +54,12 @@ public class SemesterRegistrationController {
         return ResponseEntity.ok(response);
     }
 
-    // Complete registration (no more changes allowed)
     @PostMapping("/{registrationId}/complete")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
     public ResponseEntity<SemesterRegistrationResponseDTO> completeRegistration(@PathVariable Long registrationId) {
         SemesterRegistrationResponseDTO response = registrationService.completeRegistration(registrationId);
         return ResponseEntity.ok(response);
     }
-
-    // Process payment for registration
     @PostMapping("/{registrationId}/pay")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT')")
     public ResponseEntity<SemesterRegistrationResponseDTO> processPayment(
@@ -80,7 +71,6 @@ public class SemesterRegistrationController {
         return ResponseEntity.ok(response);
     }
 
-    // Get student's semester registrations
     @GetMapping("/students/{studentId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<List<SemesterRegistrationResponseDTO>> getStudentRegistrations(@PathVariable Long studentId) {
@@ -89,8 +79,6 @@ public class SemesterRegistrationController {
         }
         return ResponseEntity.ok(registrationService.getStudentRegistrations(studentId));
     }
-
-    // Get current semester registration
     @GetMapping("/students/{studentId}/current")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
     public ResponseEntity<SemesterRegistrationResponseDTO> getCurrentRegistration(@PathVariable Long studentId) {
@@ -101,7 +89,6 @@ public class SemesterRegistrationController {
         return response != null ? ResponseEntity.ok(response) : ResponseEntity.noContent().build();
     }
 
-    // Check if student can register for semester
     @GetMapping("/students/{studentId}/can-register")
     public ResponseEntity<Map<String, Object>> canRegister(
             @PathVariable Long studentId,
@@ -116,7 +103,6 @@ public class SemesterRegistrationController {
         return ResponseEntity.ok(response);
     }
 
-    // Admin: Get all registrations by status
     @GetMapping("/status/{status}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<List<SemesterRegistrationResponseDTO>> getRegistrationsByStatus(@PathVariable String status) {

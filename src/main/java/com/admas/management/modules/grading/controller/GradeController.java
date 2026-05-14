@@ -5,6 +5,8 @@ import com.admas.management.modules.grading.dto.response.GradeResponseDTO;
 import com.admas.management.modules.grading.dto.response.TranscriptResponseDTO;
 import com.admas.management.modules.grading.service.GradeService;
 import com.admas.management.modules.infrastructure.security.service.SecurityService;
+import com.admas.management.modules.shared.model.User;
+import com.admas.management.modules.shared.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,7 @@ public class GradeController {
 
     private final GradeService gradeService;
     private final SecurityService securityService;
-
+    private final UserRepository userRepository;
     @PostMapping("/grades/submit")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<GradeResponseDTO> submitGrade(
@@ -43,11 +45,21 @@ public class GradeController {
     }
 
     @GetMapping("/students/{studentId}/grades")
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
-    public ResponseEntity<List<GradeResponseDTO>> getStudentGrades(@PathVariable Long studentId) {
-        if (!securityService.isStudentOwner(studentId)) {
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'PROFESSOR', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
+    public ResponseEntity<List<GradeResponseDTO>> getStudentGrades(
+            @PathVariable Long studentId,
+            Authentication authentication) {
+
+        // Get current logged-in user
+        String email = authentication.getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Students can only view their own grades
+        if (currentUser.isStudent() && !currentUser.getId().equals(studentId)) {
             throw new RuntimeException("Access denied");
         }
+
         List<GradeResponseDTO> grades = gradeService.getStudentGrades(studentId);
         return ResponseEntity.ok(grades);
     }
@@ -74,11 +86,19 @@ public class GradeController {
     }
 
     @GetMapping("/students/{studentId}/cgpa")
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
-    public ResponseEntity<Double> getStudentCGPA(@PathVariable Long studentId) {
-        if (!securityService.isStudentOwner(studentId)) {
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'PROFESSOR', 'ADMIN', 'ACADEMIC_ADMINISTRATOR')")
+    public ResponseEntity<Double> getStudentCGPA(
+            @PathVariable Long studentId,
+            Authentication authentication) {
+
+        User currentUser = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Students can only view their own CGPA
+        if (currentUser.isStudent() && !currentUser.getId().equals(studentId)) {
             throw new RuntimeException("Access denied");
         }
+
         Double cgpa = gradeService.calculateStudentCGPA(studentId);
         return ResponseEntity.ok(cgpa);
     }

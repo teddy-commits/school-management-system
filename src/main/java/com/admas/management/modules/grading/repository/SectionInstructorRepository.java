@@ -14,4 +14,5 @@ public interface SectionInstructorRepository extends JpaRepository<SectionInstru
     long countBySectionId(Long sectionId);
     List<SectionInstructor> findByInstructorEmailAndSection_SemesterAndSection_AcademicYear(
             String instructorEmail, String semester, Integer academicYear);
+    boolean existsByInstructorEmailAndCourseId(String instructorEmail, Long courseId);
 }

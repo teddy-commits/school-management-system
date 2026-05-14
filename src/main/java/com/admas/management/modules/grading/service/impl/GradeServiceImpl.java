@@ -8,6 +8,7 @@ import com.admas.management.modules.grading.model.entity.Grade;
 import com.admas.management.modules.grading.model.enums.CourseStatus;
 import com.admas.management.modules.grading.repository.CourseRepository;
 import com.admas.management.modules.grading.repository.GradeRepository;
+import com.admas.management.modules.grading.repository.SectionInstructorRepository;
 import com.admas.management.modules.grading.service.GPACalculatorService;
 import com.admas.management.modules.grading.service.GradeService;
 import com.admas.management.modules.shared.model.User;
@@ -32,6 +33,7 @@ public class GradeServiceImpl implements GradeService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final GPACalculatorService gpaCalculatorService;
+    private final SectionInstructorRepository sectionInstructorRepository;
 
     @Override
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'PROFESSOR', 'ADMIN')")
@@ -39,14 +41,22 @@ public class GradeServiceImpl implements GradeService {
         log.info("Submitting grade for student: {} in course: {}", dto.getStudentId(), dto.getCourseCode());
 
         User student = userRepository.findById(dto.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new RuntimeException("Student not found with id: " + dto.getStudentId()));
 
         Course course = courseRepository.findByCourseCode(dto.getCourseCode())
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-        if (!course.getInstructorEmail().equals(instructorEmail) &&
-                !instructorEmail.equals("admin@university.com")) {
+                .orElseThrow(() -> new RuntimeException("Course not found with code: " + dto.getCourseCode()));
+
+        // ✅ Authorization: Check if instructor is assigned to this course via SectionInstructor
+        boolean isAdmin = instructorEmail.equals("admin@university.com");
+        boolean isAssignedInstructor = sectionInstructorRepository
+                .existsByInstructorEmailAndCourseId(instructorEmail, course.getId());
+
+        if (!isAssignedInstructor && !isAdmin) {
+            log.warn("Instructor {} attempted to grade course {} but is not assigned", instructorEmail, dto.getCourseCode());
             throw new RuntimeException("You are not authorized to grade this course");
         }
+
+        // Find existing grade or create new one
         Grade grade = gradeRepository.findByStudentAndCourse(student, course)
                 .orElse(new Grade());
 
@@ -61,9 +71,14 @@ public class GradeServiceImpl implements GradeService {
         grade.calculateGrade();
 
         Grade savedGrade = gradeRepository.save(grade);
+
+        // Recalculate student's CGPA
         Double newCGPA = gpaCalculatorService.calculateStudentCGPA(student.getId());
         student.setCgpa(newCGPA);
         userRepository.save(student);
+
+        log.info("Grade submitted successfully for student {} in course {}: Score={}, Grade={}",
+                student.getEmail(), course.getCourseCode(), savedGrade.getScore(), savedGrade.getGradeLetter());
 
         return mapToDTO(savedGrade);
     }

@@ -5,11 +5,14 @@ import com.admas.management.modules.finance.dto.response.FeeSummaryDTO;
 import com.admas.management.modules.finance.dto.request.FeeStructureRequestDTO;
 import com.admas.management.modules.finance.service.FeeService;
 import com.admas.management.modules.infrastructure.security.service.SecurityService;
+import com.admas.management.modules.shared.model.User;
+import com.admas.management.modules.shared.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +24,7 @@ public class FeeController {
 
     private final FeeService feeService;
     private final SecurityService securityService;
-
+    private final UserRepository userRepository;
     @PostMapping("/fee-structures")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public ResponseEntity<FeeResponseDTO> createFeeStructure(@Valid @RequestBody FeeStructureRequestDTO request) {
@@ -56,11 +59,19 @@ public class FeeController {
     }
 
     @GetMapping("/students/{studentId}/summary")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
-    public ResponseEntity<FeeSummaryDTO> getStudentFeeSummary(@PathVariable Long studentId) {
-        if (!securityService.isStudentOwner(studentId)) {
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER', 'ACADEMIC_ADMINISTRATOR')")
+    public ResponseEntity<FeeSummaryDTO> getStudentFeeSummary(
+            @PathVariable Long studentId,
+            Authentication authentication) {
+
+        User currentUser = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Students can only view their own fee summary
+        if (currentUser.isStudent() && !currentUser.getId().equals(studentId)) {
             throw new RuntimeException("Access denied");
         }
+
         return ResponseEntity.ok(feeService.getStudentFeeSummary(studentId));
     }
 

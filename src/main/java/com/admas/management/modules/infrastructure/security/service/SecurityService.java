@@ -14,18 +14,18 @@ public class SecurityService {
 
     public boolean isStudentOwner(Long studentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserId = authentication.getName();
+        String email = authentication.getName();
+        User currentUser = userRepository.findByEmail(email).orElse(null);
 
-        User currentUser = findUserById(currentUserId);
         if (currentUser == null) return false;
         return currentUser.getId().equals(studentId) || currentUser.isAdmin();
     }
 
     public boolean isOwnerOrAdmin(Long userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserId = authentication.getName();
+        String email = authentication.getName();
 
-        User currentUser = findUserById(currentUserId);
+        User currentUser = userRepository.findByEmail(email).orElse(null);
         if (currentUser == null) return false;
 
         return currentUser.getId().equals(userId) || currentUser.isAdmin();
@@ -37,9 +37,10 @@ public class SecurityService {
     }
 
     public User getCurrentUser() {
-        String currentUserId = getCurrentUserId();
-        return findUserById(currentUserId);
+        String email = getCurrentUserId();
+        return userRepository.findByEmail(email).orElse(null);
     }
+
 
     private User findUserById(String id) {
         return userRepository.findByStudentId(id)
