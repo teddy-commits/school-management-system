@@ -6,7 +6,8 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-FROM openjdk:17-slim
+# Use Eclipse Temurin instead of deprecated OpenJDK
+FROM eclipse-temurin:17-jre-slim
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app.jar"]
