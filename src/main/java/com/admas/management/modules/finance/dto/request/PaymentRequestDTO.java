@@ -34,7 +34,6 @@ public class PaymentRequestDTO {
     private String bankName;
     private String chequeNumber;
 
-    @Pattern(regexp = "^[0-9]{10}$", message = "Mobile number must be 10 digits")
     private String mobileNumber;
 
     @Size(max = 500, message = "Remarks max 500 characters")

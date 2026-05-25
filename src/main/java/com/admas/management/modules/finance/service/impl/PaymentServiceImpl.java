@@ -36,7 +36,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final UserRepository userRepository;
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT','MANAGEMENT', 'FINANCE_MANAGER')")
     public PaymentResponseDTO processPayment(PaymentRequestDTO request, String receivedBy) {
 
         User student = userRepository.findById(request.getStudentId())

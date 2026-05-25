@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class PaymentValidator {
@@ -40,7 +39,6 @@ public class PaymentValidator {
         if (request.getAmount() <= 0) {
             errors.add("Payment amount must be greater than 0");
         }
-
         if (request.getPaymentMethod() != null) {
             switch (request.getPaymentMethod()) {
                 case BANK_TRANSFER:
@@ -48,6 +46,7 @@ public class PaymentValidator {
                         errors.add("Reference number is required for bank transfer");
                     }
                     break;
+
                 case CHECK:
                     if (request.getChequeNumber() == null || request.getChequeNumber().isEmpty()) {
                         errors.add("Cheque number is required for check payment");
@@ -56,19 +55,34 @@ public class PaymentValidator {
                         errors.add("Bank name is required for check payment");
                     }
                     break;
+
                 case MOBILE_MONEY:
                     if (request.getMobileNumber() == null || request.getMobileNumber().isEmpty()) {
                         errors.add("Mobile number is required for mobile money payment");
+                    } else if (!request.getMobileNumber().matches("^[0-9]{10}$")) {
+                        errors.add("Mobile number must be 10 digits");
                     }
+
                     if (request.getReferenceNumber() == null || request.getReferenceNumber().isEmpty()) {
                         errors.add("Transaction reference is required for mobile money");
                     }
+                    break;
+
+                case CREDIT_CARD:
+                    if (request.getReferenceNumber() == null || request.getReferenceNumber().isEmpty()) {
+                        errors.add("Transaction reference is required for card payment");
+                    }
+                    break;
+
+                case CASH:
                     break;
             }
         }
 
         return errors;
     }
+
+
 
     public List<String> validateFeeWaiver(Long feeId, Double waiverAmount, String reason) {
         List<String> errors = new ArrayList<>();
