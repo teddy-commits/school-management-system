@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class CourseMapper {
 
     private final UserRepository userRepository;
-    private final DepartmentRepository departmentRepository;  // Add this
+    private final DepartmentRepository departmentRepository;
 
     public Course toEntity(CourseRequestDTO dto) {
         Course course = new Course();
@@ -24,8 +24,6 @@ public class CourseMapper {
         course.setCourseName(dto.getCourseName());
         course.setDescription(dto.getDescription());
         course.setCredits(dto.getCredits());
-
-        // Fix: Convert String department name to Department object
         if (dto.getDepartment() != null && !dto.getDepartment().isEmpty()) {
             Department department = departmentRepository.findByName(dto.getDepartment())
                     .orElseThrow(() -> new RuntimeException("Department not found: " + dto.getDepartment()));
@@ -43,8 +41,6 @@ public class CourseMapper {
         course.setSyllabus(dto.getSyllabus());
         course.setRoom(dto.getRoom());
         course.setSchedule(dto.getSchedule());
-
-        // Set instructor name if email exists
         if (dto.getInstructorEmail() != null) {
             userRepository.findByEmail(dto.getInstructorEmail()).ifPresent(instructor ->
                     course.setInstructorName(instructor.getFullName())
@@ -84,8 +80,6 @@ public class CourseMapper {
         if (dto.getCourseName() != null) course.setCourseName(dto.getCourseName());
         if (dto.getDescription() != null) course.setDescription(dto.getDescription());
         if (dto.getCredits() != null) course.setCredits(dto.getCredits());
-
-        // Fix: Handle department update - convert String to Department object
         if (dto.getDepartment() != null && !dto.getDepartment().isEmpty()) {
             Department department = departmentRepository.findByName(dto.getDepartment())
                     .orElseThrow(() -> new RuntimeException("Department not found: " + dto.getDepartment()));

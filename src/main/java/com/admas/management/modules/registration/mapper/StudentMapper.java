@@ -29,7 +29,6 @@ public class StudentMapper {
         user.setPhoneNumber(request.getPhoneNumber());
         user.setAddress(request.getAddress());
 
-        // Handle department
         if (request.getDepartmentId() != null) {
             Department department = departmentRepository.findById(request.getDepartmentId())
                     .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));

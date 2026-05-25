@@ -58,15 +58,12 @@ public class FeeServiceImpl implements FeeService {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public FeeResponseDTO generateFeeForStudent(Long studentId, Long feeStructureId, String semester, Integer academicYear) {
-        log.info("Generating fee for student: {}, structure: {}", studentId, feeStructureId);
 
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
         FeeStructure feeStructure = feeStructureRepository.findById(feeStructureId)
                 .orElseThrow(() -> new RuntimeException("Fee structure not found"));
-
-        // Check if fee already exists
         boolean exists = feeRepository.existsByStudentAndFeeTypeAndSemester(
                 student, feeStructure.getFeeType(), semester);
 
@@ -211,9 +208,7 @@ public class FeeServiceImpl implements FeeService {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public List<FeeResponseDTO> generateAllFeesForSemester(String semester, Integer academicYear) {
-        // This would generate fees for all students
-        log.info("Generating fees for all students for semester: {} {}", semester, academicYear);
-        return List.of(); // Placeholder
+        return List.of();
     }
 
     @Override

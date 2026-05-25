@@ -50,12 +50,10 @@ public class GradeController {
             @PathVariable Long studentId,
             Authentication authentication) {
 
-        // Get current logged-in user
         String email = authentication.getName();
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Students can only view their own grades
         if (currentUser.isStudent() && !currentUser.getId().equals(studentId)) {
             throw new RuntimeException("Access denied");
         }
@@ -93,8 +91,6 @@ public class GradeController {
 
         User currentUser = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Students can only view their own CGPA
         if (currentUser.isStudent() && !currentUser.getId().equals(studentId)) {
             throw new RuntimeException("Access denied");
         }

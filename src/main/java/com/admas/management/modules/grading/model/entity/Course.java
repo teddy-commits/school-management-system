@@ -40,7 +40,6 @@ public class Course {
 
     private Integer credits;
 
-    // Department Relationship (Foreign Key)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
@@ -79,8 +78,6 @@ public class Course {
     @OneToMany(mappedBy = "course")
     private Set<Grade> grades = new HashSet<>();
 
-    // Helper methods - DO NOT add getDepartment() that returns String
-    // Use these instead:
     public String getDepartmentName() {
         return department != null ? department.getName() : null;
     }

@@ -27,7 +27,6 @@ public class CourseSectionController {
     private final CourseSectionService sectionService;
     private final EnrollmentService enrollmentService;
 
-    // Create section
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<CourseSectionResponseDTO> createSection(@Valid @RequestBody CourseSectionRequestDTO request) {
@@ -35,17 +34,12 @@ public class CourseSectionController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Get all sections (for admin view)
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<List<CourseSectionResponseDTO>> getAllSections() {
-        // You need to implement this in service
         List<CourseSectionResponseDTO> sections = sectionService.getAllSections();
         return ResponseEntity.ok(sections);
     }
-    // Add this method to your CourseSectionController
-
-    // Get sections by semester and academic year
     @GetMapping("/semester")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR', 'MANAGEMENT')")
     public ResponseEntity<List<CourseSectionResponseDTO>> getSectionsBySemester(
@@ -55,14 +49,12 @@ public class CourseSectionController {
         return ResponseEntity.ok(sections);
     }
 
-    // Get sections by course (for admin view)
     @GetMapping("/course/{courseId}")
     public ResponseEntity<List<CourseSectionResponseDTO>> getSectionsByCourse(@PathVariable Long courseId) {
         List<CourseSectionResponseDTO> sections = sectionService.getSectionsByCourse(courseId);
         return ResponseEntity.ok(sections);
     }
 
-    // Get instructor's sections (for instructor dashboard)
     @GetMapping("/instructor/current")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<List<CourseSectionResponseDTO>> getMySections(
@@ -73,8 +65,6 @@ public class CourseSectionController {
         List<CourseSectionResponseDTO> sections = sectionService.getSectionsByInstructorEmail(instructorEmail, semester, academicYear);
         return ResponseEntity.ok(sections);
     }
-
-    // Get open sections for student registration
     @GetMapping("/open")
     public ResponseEntity<List<CourseSectionResponseDTO>> getOpenSections(
             @RequestParam String semester,
@@ -83,14 +73,12 @@ public class CourseSectionController {
         return ResponseEntity.ok(sections);
     }
 
-    // Get section by ID
     @GetMapping("/{id}")
     public ResponseEntity<CourseSectionResponseDTO> getSectionById(@PathVariable Long id) {
         CourseSectionResponseDTO response = sectionService.getSectionById(id);
         return ResponseEntity.ok(response);
     }
 
-    // Update section
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<CourseSectionResponseDTO> updateSection(
@@ -100,7 +88,6 @@ public class CourseSectionController {
         return ResponseEntity.ok(response);
     }
 
-    // Delete section
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<Void> deleteSection(@PathVariable Long id) {
@@ -108,7 +95,6 @@ public class CourseSectionController {
         return ResponseEntity.noContent().build();
     }
 
-    // Update section status
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<CourseSectionResponseDTO> updateSectionStatus(
@@ -118,7 +104,6 @@ public class CourseSectionController {
         CourseSectionResponseDTO section = sectionService.getSectionById(id);
         return ResponseEntity.ok(section);
     }
-    // Add to CourseSectionController.java
     @PostMapping("/{sectionId}/instructors")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<SectionInstructorResponseDTO> addInstructorToSection(
@@ -169,7 +154,7 @@ public class CourseSectionController {
         List<SectionCourseDTO> courses = sectionService.getSectionCourses(sectionId);
         return ResponseEntity.ok(courses);
     }
-    // Get instructor's courses across all their sections
+
     @GetMapping("/instructor/my-courses")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<List<SectionCourseDetailDTO>> getMyCourses(
@@ -177,8 +162,6 @@ public class CourseSectionController {
             @RequestParam Integer academicYear,
             Authentication authentication) {
         String instructorEmail = authentication.getName();
-
-        // ✅ Match the return types - both should be SectionCourseDetailDTO
         List<SectionCourseDetailDTO> courses = sectionService.getCoursesByInstructorEmail(instructorEmail, semester, academicYear);
 
         return ResponseEntity.ok(courses);
@@ -188,20 +171,14 @@ public class CourseSectionController {
             @PathVariable Long sectionId,
             @RequestParam(required = false) String semester,
             @RequestParam(required = false) Integer academicYear) {
-
-        // Get all courses in this section
         List<SectionCourse> sectionCourses = sectionService.getSectionCoursesEntities(sectionId);
 
         List<EnrollmentResponseDTO> enrollments = new ArrayList<>();
-
-        // Get enrollments for each course
         for (SectionCourse sc : sectionCourses) {
             List<EnrollmentResponseDTO> courseEnrollments = enrollmentService
                     .getEnrollmentsByCourseAndSemester(sc.getCourse().getId(), semester, academicYear);
             enrollments.addAll(courseEnrollments);
         }
-
-        // Remove duplicates (same student enrolled in multiple courses of same section)
         enrollments = enrollments.stream()
                 .distinct()
                 .collect(Collectors.toList());

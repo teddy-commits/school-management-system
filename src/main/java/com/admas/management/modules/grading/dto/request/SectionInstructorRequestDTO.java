@@ -16,5 +16,5 @@ public class SectionInstructorRequestDTO {
     @NotNull(message = "Instructor ID is required")
     private Long instructorId;
 
-    private Long courseId;  // Optional
+    private Long courseId;
 }

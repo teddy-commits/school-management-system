@@ -27,12 +27,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     public DepartmentResponseDTO createDepartment(DepartmentRequestDTO request) {
         log.info("Creating department: {}", request.getCode());
 
-        // Check if code already exists
         if (departmentRepository.existsByCode(request.getCode())) {
             throw new RuntimeException("Department code already exists: " + request.getCode());
         }
-
-        // Check if name already exists
         if (departmentRepository.existsByName(request.getName())) {
             throw new RuntimeException("Department name already exists: " + request.getName());
         }
@@ -60,13 +57,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
 
-        // Check if code is being changed and if new code exists
         if (!department.getCode().equals(request.getCode()) &&
                 departmentRepository.existsByCode(request.getCode())) {
             throw new RuntimeException("Department code already exists: " + request.getCode());
         }
 
-        // Check if name is being changed and if new name exists
         if (!department.getName().equals(request.getName()) &&
                 departmentRepository.existsByName(request.getName())) {
             throw new RuntimeException("Department name already exists: " + request.getName());

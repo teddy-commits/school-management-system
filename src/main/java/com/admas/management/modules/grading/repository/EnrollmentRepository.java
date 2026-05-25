@@ -23,7 +23,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId AND e.status = 'ENROLLED'")
     Long countActiveEnrollmentsByCourse(@Param("courseId") Long courseId);
 
-    // ✅ ADD THESE NEW METHODS:
     long countByStudentIdAndSemesterAndAcademicYear(Long studentId, String semester, Integer academicYear);
     boolean existsByStudentAndCourseAndSemesterAndAcademicYear(
             User student, Course course, String semester, Integer academicYear);

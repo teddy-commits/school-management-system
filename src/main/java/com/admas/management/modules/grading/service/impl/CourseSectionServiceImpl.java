@@ -44,11 +44,8 @@ public class CourseSectionServiceImpl implements CourseSectionService {
     public CourseSectionResponseDTO createSection(CourseSectionRequestDTO request) {
         log.info("Creating section for department: {}", request.getDepartmentId());
 
-        // Get department instead of course
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));
-
-        // Check if section already exists for this department, section code, semester, and academic year
         boolean exists = sectionRepository.existsByDepartmentIdAndSectionCodeAndSemesterAndAcademicYear(
                 request.getDepartmentId(), request.getSectionCode(), request.getSemester(), request.getAcademicYear());
 
@@ -57,17 +54,14 @@ public class CourseSectionServiceImpl implements CourseSectionService {
         }
 
         CourseSection section = new CourseSection();
-        section.setDepartment(department);  // Set department instead of course
+        section.setDepartment(department);
         section.setSectionCode(request.getSectionCode().toUpperCase());
-        section.setAcademicYearLevel(request.getAcademicYearLevel()); // Year of study (1,2,3,4,5)
+        section.setAcademicYearLevel(request.getAcademicYearLevel());
         section.setSemester(request.getSemester());
         section.setAcademicYear(request.getAcademicYear());
         section.setMaxStudents(request.getMaxStudents() != null ? request.getMaxStudents() : 40);
         section.setEnrolledStudents(0);
         section.setStatus(CourseSection.SectionStatus.OPEN);
-
-        // No instructor assignment at creation - will be added later
-        // No schedule or room - will be added later per course
 
         CourseSection saved = sectionRepository.save(section);
         return mapToResponseDTO(saved, "Section created successfully");
@@ -81,7 +75,6 @@ public class CourseSectionServiceImpl implements CourseSectionService {
         CourseSection section = sectionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Section not found"));
 
-        // Update only the fields that can be changed
         if (request.getMaxStudents() != null) section.setMaxStudents(request.getMaxStudents());
         if (request.getSectionCode() != null) section.setSectionCode(request.getSectionCode().toUpperCase());
         if (request.getAcademicYearLevel() != null) section.setAcademicYearLevel(request.getAcademicYearLevel());
@@ -129,14 +122,10 @@ public class CourseSectionServiceImpl implements CourseSectionService {
     @Override
     @Transactional(readOnly = true)
     public List<CourseSectionResponseDTO> getSectionsByInstructorEmail(String instructorEmail, String semester, Integer academicYear) {
-        log.info("Getting sections for instructor: {}, semester: {}, year: {}", instructorEmail, semester, academicYear);
-
-        // Find all SectionInstructor records for this instructor with the given semester and year
         List<SectionInstructor> instructorAssignments = sectionInstructorRepository
                 .findByInstructorEmailAndSection_SemesterAndSection_AcademicYear(
                         instructorEmail, semester, academicYear);
 
-        // Extract and map sections from the assignments
         return instructorAssignments.stream()
                 .map(SectionInstructor::getSection)
                 .distinct() // In case instructor is assigned to same section multiple times (different courses)
@@ -265,7 +254,7 @@ public class CourseSectionServiceImpl implements CourseSectionService {
 
                     return SectionCourseDetailDTO.builder()
                             .id(course.getId())
-                            .sectionId(section.getId())  // ✅ ADD THIS LINE
+                            .sectionId(section.getId())
                             .courseCode(course.getCourseCode())
                             .courseName(course.getCourseName())
                             .credits(course.getCredits())

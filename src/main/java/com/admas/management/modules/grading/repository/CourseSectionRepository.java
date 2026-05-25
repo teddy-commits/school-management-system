@@ -28,7 +28,6 @@ public interface CourseSectionRepository extends JpaRepository<CourseSection, Lo
             @Param("semester") String semester,
             @Param("year") Integer year);
 
-    // Get sections for instructor by email
     @Query("SELECT DISTINCT si.section FROM SectionInstructor si " +
             "WHERE si.instructor.email = :instructorEmail " +
             "AND si.section.semester = :semester " +
@@ -38,21 +37,14 @@ public interface CourseSectionRepository extends JpaRepository<CourseSection, Lo
             @Param("semester") String semester,
             @Param("year") Integer year);
 
-    // Get all sections for instructor (any semester)
     @Query("SELECT DISTINCT si.section FROM SectionInstructor si " +
             "WHERE si.instructor.email = :instructorEmail")
     List<CourseSection> findAllSectionsByInstructorEmail(
             @Param("instructorEmail") String instructorEmail);
 
-    // Get sections by instructor ID
     @Query("SELECT DISTINCT si.section FROM SectionInstructor si WHERE si.instructor.id = :instructorId")
     List<CourseSection> findByInstructorId(@Param("instructorId") Long instructorId);
 
-    // ❌ REMOVE THIS - It's in the wrong repository!
-    // @Query("SELECT sc FROM SectionCourse sc ...")
-    // List<SectionCourse> findByInstructorEmailAndSemesterAndAcademicYear(...);
-
-    // Existence checks
     boolean existsByDepartmentIdAndSectionCodeAndSemesterAndAcademicYear(
             Long departmentId, String sectionCode, String semester, Integer academicYear);
 

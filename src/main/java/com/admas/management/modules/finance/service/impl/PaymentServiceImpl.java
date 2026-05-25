@@ -38,7 +38,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
     public PaymentResponseDTO processPayment(PaymentRequestDTO request, String receivedBy) {
-        log.info("Processing payment for student: {}, amount: {}", request.getStudentId(), request.getAmount());
 
         User student = userRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));

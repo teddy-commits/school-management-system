@@ -79,7 +79,6 @@ public class GPACalculatorService {
 
         double overallCGPA = calculateStudentCGPA(student.getId());
 
-        // Get department name safely
         String departmentName = null;
         if (student.getDepartment() != null) {
             departmentName = student.getDepartment().getName();

@@ -32,7 +32,7 @@ public class SemesterRegistration {
     private User student;
 
     @Column(nullable = false)
-    private String semester; // FALL, SPRING, SUMMER
+    private String semester;
 
     @Column(name = "academic_year", nullable = false)
     private Integer academicYear;
@@ -61,11 +61,11 @@ public class SemesterRegistration {
     private LocalDateTime updatedAt;
 
     public enum RegistrationStatus {
-        PENDING,    // Registration initiated but not completed
-        COMPLETED,  // Courses selected, payment pending
-        PAID,       // Payment completed, fully registered
-        CANCELLED,  // Registration cancelled
-        DROPPED     // Student dropped the semester
+        PENDING,
+        COMPLETED,
+        PAID,
+        CANCELLED,
+        DROPPED
     }
 
     public void calculateTotals() {

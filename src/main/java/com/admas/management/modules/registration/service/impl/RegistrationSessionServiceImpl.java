@@ -26,7 +26,6 @@ public class RegistrationSessionServiceImpl implements RegistrationSessionServic
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public RegistrationSessionResponseDTO createSession(RegistrationSessionRequestDTO request) {
-        log.info("Creating registration session for {} {}", request.getSemester(), request.getAcademicYear());
         if (sessionRepository.existsBySemesterAndAcademicYear(request.getSemester(), request.getAcademicYear())) {
             throw new RuntimeException("Registration session already exists for this semester and year");
         }

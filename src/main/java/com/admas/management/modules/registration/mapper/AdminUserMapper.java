@@ -28,8 +28,6 @@ public class AdminUserMapper {
         user.setPhoneNumber(request.getPhoneNumber());
         user.setAddress(request.getAddress());
         user.setRole(request.getRole());
-
-        // Set department if departmentId is provided
         if (request.getDepartmentId() != null) {
             Department department = departmentRepository.findById(request.getDepartmentId())
                     .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));

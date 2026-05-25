@@ -20,21 +20,18 @@ import java.util.List;
 public class CourseController {
 
     private final CourseService courseService;
-
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<CourseResponseDTO> createCourse(@Valid @RequestBody CourseRequestDTO requestDTO) {
         CourseResponseDTO response = courseService.createCourse(requestDTO);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<CourseResponseDTO> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseRequestDTO requestDTO) {
         CourseResponseDTO response = courseService.updateCourse(id, requestDTO);
         return ResponseEntity.ok(response);
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<CourseResponseDTO> getCourseById(@PathVariable Long id) {
         CourseResponseDTO response = courseService.getCourseById(id);

@@ -21,7 +21,6 @@ public class PaymentValidator {
     public List<String> validatePaymentRequest(PaymentRequestDTO request) {
         List<String> errors = new ArrayList<>();
 
-        // Validate student exists
         User student = userRepository.findById(request.getStudentId()).orElse(null);
         if (student == null) {
             errors.add("Student not found with ID: " + request.getStudentId());
@@ -29,7 +28,6 @@ public class PaymentValidator {
             errors.add("User is not a student");
         }
 
-        // Validate fee if provided
         if (request.getFeeId() != null) {
             Fee fee = feeRepository.findById(request.getFeeId()).orElse(null);
             if (fee == null) {
@@ -39,12 +37,10 @@ public class PaymentValidator {
             }
         }
 
-        // Validate payment amount
         if (request.getAmount() <= 0) {
             errors.add("Payment amount must be greater than 0");
         }
 
-        // Validate payment method specific fields
         if (request.getPaymentMethod() != null) {
             switch (request.getPaymentMethod()) {
                 case BANK_TRANSFER:

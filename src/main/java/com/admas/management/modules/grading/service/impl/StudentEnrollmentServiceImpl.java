@@ -26,9 +26,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
-    // ✅ RENAMED for clarity
-    private final StudentEnrollmentRepository studentEnrollmentRepo;  // For StudentEnrollment (section-level)
-    private final EnrollmentRepository enrollmentRepo;                // For Enrollment (course-level)
+    private final StudentEnrollmentRepository studentEnrollmentRepo;
+    private final EnrollmentRepository enrollmentRepo;
     private final CourseSectionRepository sectionRepository;
     private final SectionCourseRepository sectionCourseRepository;
     private final UserRepository userRepository;
@@ -36,9 +35,6 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public StudentEnrollmentResponseDTO enrollStudent(StudentEnrollmentRequestDTO request) {
-        log.info("Enrolling student {} in section {}", request.getStudentId(), request.getSectionId());
-
-        // Check if already enrolled in this section
         if (studentEnrollmentRepo.existsByStudentIdAndSectionId(request.getStudentId(), request.getSectionId())) {
             throw new RuntimeException("Student already enrolled in this section");
         }
@@ -48,27 +44,18 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
         CourseSection section = sectionRepository.findById(request.getSectionId())
                 .orElseThrow(() -> new RuntimeException("Section not found"));
-
-        // Check if section has available seats
         if (!section.hasAvailableSeats()) {
             throw new RuntimeException("No available seats in this section");
         }
-
-        // Check if section is open for registration
         if (section.getStatus() != CourseSection.SectionStatus.OPEN) {
             throw new RuntimeException("Section is not open for registration");
         }
-
-        // ✅ STEP 1: Create StudentEnrollment (section-level)
         StudentEnrollment enrollment = new StudentEnrollment();
         enrollment.setStudent(student);
         enrollment.setSection(section);
         enrollment.setEnrollmentDate(LocalDateTime.now());
         enrollment.setStatus(StudentEnrollment.EnrollmentStatus.ENROLLED);
         StudentEnrollment saved = studentEnrollmentRepo.save(enrollment);
-        log.info("Created StudentEnrollment for section {}", section.getSectionCode());
-
-        // ✅ STEP 2: Create Enrollment records for each course in the section (course-level)
         List<SectionCourse> sectionCourses = sectionCourseRepository.findBySectionId(section.getId());
         int enrolledCourseCount = 0;
 
@@ -93,14 +80,8 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
             }
         }
 
-        // Update section enrollment count
         section.incrementEnrolledStudents();
         sectionRepository.save(section);
-
-        log.info("Enrolled student {} in {} courses of section {}",
-                student.getEmail(), enrolledCourseCount, section.getSectionCode());
-
-        // Get courses info for response
         String courseInfo = sectionCourses.stream()
                 .map(sc -> sc.getCourse().getCourseCode())
                 .collect(Collectors.joining(", "));
@@ -120,8 +101,6 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
         enrollment.setStatus(StudentEnrollment.EnrollmentStatus.DROPPED);
         StudentEnrollment updated = studentEnrollmentRepo.save(enrollment);
-
-        // Update section enrollment count
         CourseSection section = enrollment.getSection();
         section.decrementEnrolledStudents();
         sectionRepository.save(section);
@@ -189,8 +168,6 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
     private StudentEnrollmentResponseDTO mapToResponseDTO(StudentEnrollment enrollment, String message) {
         CourseSection section = enrollment.getSection();
-
-        // Get courses in this section
         List<SectionCourse> sectionCourses = sectionCourseRepository.findBySectionId(section.getId());
         String courseInfo = sectionCourses.stream()
                 .map(sc -> sc.getCourse().getCourseCode())

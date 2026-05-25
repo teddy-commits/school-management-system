@@ -66,8 +66,6 @@ public class FeeController {
 
         User currentUser = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Students can only view their own fee summary
         if (currentUser.isStudent() && !currentUser.getId().equals(studentId)) {
             throw new RuntimeException("Access denied");
         }

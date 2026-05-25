@@ -76,7 +76,6 @@ public class User {
     private String currentSemester;
     private Double cgpa;
 
-    // NEW: Academic Year Level (1, 2, 3, 4, 5)
     private Integer academicYearLevel;
 
     @Enumerated(EnumType.STRING)

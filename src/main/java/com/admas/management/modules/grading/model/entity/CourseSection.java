@@ -26,27 +26,25 @@ public class CourseSection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Department relationship (NEW - replaces course requirement)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
-    // Course relationship (optional - can be null initially)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;
 
     @Column(nullable = false)
-    private String sectionCode; // 'A', 'B', '01', '02'
+    private String sectionCode;
 
     @Column(nullable = false)
-    private Integer academicYearLevel; // 1, 2, 3, 4, 5
+    private Integer academicYearLevel;
 
     @Column(nullable = false)
-    private String semester; // FALL, SPRING, SUMMER
+    private String semester;
 
     @Column(nullable = false)
-    private Integer academicYear; // 2024, 2025, etc.
+    private Integer academicYear;
 
     @ManyToOne
     @JoinColumn(name = "instructor_id")
@@ -69,7 +67,6 @@ public class CourseSection {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-// Add these to CourseSection.java
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL)
     private Set<SectionInstructor> sectionInstructors = new HashSet<>();
@@ -77,7 +74,6 @@ public class CourseSection {
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL)
     private Set<SectionCourse> sectionCourses = new HashSet<>();
 
-    // Helper methods
     public void addInstructor(User instructor, Course course) {
         SectionInstructor si = new SectionInstructor();
         si.setSection(this);
@@ -126,8 +122,6 @@ public class CourseSection {
             this.status = SectionStatus.OPEN;
         }
     }
-
-    // Helper method to get formatted section name
     public String getFormattedSectionName() {
         return String.format("%s - Year %d Section %s",
                 department != null ? department.getCode() : "N/A",

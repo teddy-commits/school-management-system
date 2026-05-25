@@ -37,7 +37,6 @@ public class UserResponse {
     private String permissions;
 
     public static UserResponse fromUser(User user) {
-        // Get department name safely
         String departmentName = null;
         if (user.getDepartment() != null) {
             departmentName = user.getDepartment().getName();

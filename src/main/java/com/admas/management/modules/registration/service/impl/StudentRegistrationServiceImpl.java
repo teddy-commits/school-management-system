@@ -34,8 +34,6 @@ public class StudentRegistrationServiceImpl implements StudentRegistrationServic
         if (!errors.isEmpty()) {
             throw new RuntimeException("Validation failed: " + String.join(", ", errors));
         }
-
-        // Verify department exists
         if (request.getDepartmentId() != null) {
             departmentRepository.findById(request.getDepartmentId())
                     .orElseThrow(() -> new RuntimeException("Department not found with id: " + request.getDepartmentId()));
@@ -44,7 +42,7 @@ public class StudentRegistrationServiceImpl implements StudentRegistrationServic
         User user = studentMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStudentId(generateStudentId());
-        user.setAcademicYearLevel(1);  // Explicitly set to 1 for new students
+        user.setAcademicYearLevel(1);
 
         User savedUser = userRepository.save(user);
         return studentMapper.toRegistrationResponse(savedUser, "Student registered successfully. Student ID: " + savedUser.getStudentId());

@@ -17,7 +17,6 @@ public interface RegistrationSessionRepository extends JpaRepository<Registratio
 
     List<RegistrationSession> findByIsActiveTrue();
 
-    // Fix: Use proper date comparison
     @Query("SELECT rs FROM RegistrationSession rs WHERE rs.isActive = true AND rs.startDate <= :now AND rs.endDate >= :now")
     Optional<RegistrationSession> findCurrentOpenSession(@Param("now") LocalDateTime now);
 
@@ -26,7 +25,6 @@ public interface RegistrationSessionRepository extends JpaRepository<Registratio
 
     boolean existsBySemesterAndAcademicYear(String semester, Integer academicYear);
 
-    // Add this for debugging
     @Query("SELECT rs FROM RegistrationSession rs WHERE rs.isActive = true")
     List<RegistrationSession> findAllActiveSessions();
 }

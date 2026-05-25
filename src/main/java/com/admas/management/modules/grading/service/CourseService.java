@@ -17,7 +17,6 @@ public interface CourseService {
     List<CourseResponseDTO> getCoursesBySemester(Semester semester, Integer academicYear);
     List<CourseResponseDTO> getCoursesByInstructor(String instructorEmail);
 
-    // New methods for instructor department-based filtering
     List<CourseResponseDTO> getCoursesByInstructorDepartment(String instructorEmail);
     List<CourseResponseDTO> getAvailableCoursesForInstructor(String instructorEmail);
 

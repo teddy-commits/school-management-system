@@ -88,18 +88,13 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrolled);
     }
 
-    // ========== Section-based Enrollment (New) ==========
     @PostMapping("/section")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<StudentEnrollmentResponseDTO> enrollInSection(@Valid @RequestBody StudentEnrollmentRequestDTO request) {
-        // Remove the student owner check for admin roles
-        // Only check if the user is trying to enroll themselves when they are a student
-        // For ADMIN and ACADEMIC_ADMINISTRATOR, they can enroll any student
 
         StudentEnrollmentResponseDTO response = studentEnrollmentService.enrollStudent(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-    // In your enrollment controller
     @PostMapping("/section/{sectionId}/student/{studentId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<Map<String, String>> enrollStudentInSection(
@@ -125,10 +120,8 @@ public class EnrollmentController {
         List<EnrollmentResponseDTO> students;
 
         if (sectionId != null) {
-            // Filter by course AND section
             students = enrollmentService.getEnrollmentsByCourseAndSection(courseId, sectionId, semester, academicYear);
         } else {
-            // Fallback to just course (backward compatibility)
             students = enrollmentService.getEnrollmentsByCourseAndSemester(courseId, semester, academicYear);
         }
 

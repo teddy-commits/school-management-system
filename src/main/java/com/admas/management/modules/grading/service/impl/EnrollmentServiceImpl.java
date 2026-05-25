@@ -128,8 +128,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        // Check existing section enrollment
         List<StudentEnrollment> existingEnrollments = studentEnrollmentRepository
                 .findByStudentIdAndSection_SemesterAndSection_AcademicYear(studentId, semester, academicYear);
 
@@ -137,24 +135,18 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             throw new RuntimeException("Student already enrolled in another section");
         }
 
-        // ❌ REMOVED course count check here
-
         if (!section.hasAvailableSeats()) {
             throw new RuntimeException("No available seats");
         }
 
-        // STEP 1: Create StudentEnrollment
         StudentEnrollment studentEnrollment = new StudentEnrollment();
         studentEnrollment.setStudent(student);
         studentEnrollment.setSection(section);
         studentEnrollment.setEnrollmentDate(LocalDateTime.now());
         studentEnrollment.setStatus(StudentEnrollment.EnrollmentStatus.ENROLLED);
         studentEnrollmentRepository.save(studentEnrollment);
-        log.info("✅ Created StudentEnrollment for section {}", section.getSectionCode());
-
-        // STEP 2: Get courses
         List<SectionCourse> sectionCourses = sectionCourseRepository.findBySectionId(sectionId);
-        log.info("📚 Section {} has {} courses", section.getSectionCode(), sectionCourses.size());
+
 
         int enrolledCount = 0;
 
@@ -195,23 +187,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public List<EnrollmentResponseDTO> getEnrollmentsByCourseAndSection(
             Long courseId, Long sectionId, String semester, Integer academicYear) {
 
-        log.info("Getting enrollments for course {} in section {} for {} {}",
-                courseId, sectionId, semester, academicYear);
 
-        // Get all students enrolled in the course for this semester
         List<Enrollment> courseEnrollments = enrollmentRepository
                 .findByCourseIdAndSemesterAndAcademicYear(courseId, semester, academicYear);
-
-        // Get all students enrolled in the specific section
         List<StudentEnrollment> sectionEnrollments = studentEnrollmentRepository
                 .findBySectionId(sectionId);
-
-        // Get the set of student IDs that are in this section
         Set<Long> sectionStudentIds = sectionEnrollments.stream()
                 .map(se -> se.getStudent().getId())
                 .collect(Collectors.toSet());
-
-        // Filter course enrollments to only include students in this section
         return courseEnrollments.stream()
                 .filter(e -> sectionStudentIds.contains(e.getStudent().getId()))
                 .map(enrollmentMapper::toResponseDTO)

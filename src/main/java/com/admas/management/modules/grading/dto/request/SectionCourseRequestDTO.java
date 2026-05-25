@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SectionCourseRequestDTO {
 
-    // Remove sectionId - it comes from URL path
-    // @NotNull(message = "Section ID is required")
-    // private Long sectionId;
-
     @NotNull(message = "Course ID is required")
     private Long courseId;
 

@@ -32,7 +32,7 @@ public class SemesterRegistrationServiceImpl implements SemesterRegistrationServ
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
 
-    private static final double FEE_PER_CREDIT = 1500.0; // $1500 per credit hour
+    private static final double FEE_PER_CREDIT = 1500.0;
 
     @Override
     public SemesterRegistrationResponseDTO initiateRegistration(SemesterRegistrationRequestDTO request) {
@@ -40,8 +40,6 @@ public class SemesterRegistrationServiceImpl implements SemesterRegistrationServ
 
         User student = userRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        // Check if already registered for this semester
         if (registrationRepository.existsByStudentAndSemesterAndAcademicYear(
                 student, request.getSemester(), request.getAcademicYear())) {
             throw new RuntimeException("Student already registered for this semester");
@@ -54,7 +52,6 @@ public class SemesterRegistrationServiceImpl implements SemesterRegistrationServ
         registration.setRegistrationDate(LocalDateTime.now());
         registration.setStatus(SemesterRegistration.RegistrationStatus.PENDING);
 
-        // Add selected courses
         for (Long courseId : request.getCourseIds()) {
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new RuntimeException("Course not found: " + courseId));
@@ -87,7 +84,6 @@ public class SemesterRegistrationServiceImpl implements SemesterRegistrationServ
         }
 
         for (Long courseId : courseIds) {
-            // Check if already enrolled
             boolean alreadyEnrolled = registration.getCourseEnrollments().stream()
                     .anyMatch(ce -> ce.getCourse().getId().equals(courseId));
 
@@ -178,8 +174,6 @@ public class SemesterRegistrationServiceImpl implements SemesterRegistrationServ
     public SemesterRegistrationResponseDTO getCurrentSemesterRegistration(Long studentId) {
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        // Get current semester (you can determine based on current date)
         String currentSemester = getCurrentSemester();
         Integer currentYear = getCurrentAcademicYear();
 
@@ -226,7 +220,6 @@ public class SemesterRegistrationServiceImpl implements SemesterRegistrationServ
     private Integer getCurrentAcademicYear() {
         int year = LocalDateTime.now().getYear();
         int month = LocalDateTime.now().getMonthValue();
-        // If month is fall or winter, it's current year, else next year
         return year;
     }
 

@@ -34,8 +34,6 @@ public class RegistrationSessionController {
         result.put("currentServerTime", now);
         result.put("currentServerTimeISO", now.toString());
         result.put("currentTimestamp", now.toLocalTime().toString());
-
-        // Get all active sessions
         List<RegistrationSession> activeSessions = sessionRepository.findAllActiveSessions();
         List<Map<String, Object>> sessionDetails = new ArrayList<>();
 

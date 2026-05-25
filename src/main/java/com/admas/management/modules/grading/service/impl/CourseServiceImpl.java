@@ -138,7 +138,6 @@ public class CourseServiceImpl implements CourseService {
 
         log.info("Instructor {} belongs to department: {}, fetching assigned courses", instructorEmail, departmentName);
 
-        // Return ONLY courses where this instructor is the assigned instructor
         List<Course> courses = courseRepository.findByInstructorEmail(instructorEmail);
 
         log.info("Found {} courses assigned to instructor {}", courses.size(), instructorEmail);
@@ -154,8 +153,6 @@ public class CourseServiceImpl implements CourseService {
 
         User instructor = userRepository.findByEmail(instructorEmail)
                 .orElseThrow(() -> new RuntimeException("Instructor not found with email: " + instructorEmail));
-
-        // Get department name from the department relationship
         String departmentName = null;
         if (instructor.getDepartment() != null) {
             departmentName = instructor.getDepartment().getName();
