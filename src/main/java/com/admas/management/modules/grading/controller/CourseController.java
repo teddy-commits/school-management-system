@@ -33,6 +33,7 @@ public class CourseController {
         return ResponseEntity.ok(response);
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACADEMIC_ADMINISTRATOR','INSTRUCTOR')")
     public ResponseEntity<CourseResponseDTO> getCourseById(@PathVariable Long id) {
         CourseResponseDTO response = courseService.getCourseById(id);
         return ResponseEntity.ok(response);
@@ -59,7 +60,7 @@ public class CourseController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MANAGEMENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MANAGEMENT','ACADEMIC_ADMINISTRATOR')")
     public ResponseEntity<List<CourseResponseDTO>> getAllCourses() {
         List<CourseResponseDTO> courses = courseService.getAllCourses();
         return ResponseEntity.ok(courses);

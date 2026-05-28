@@ -58,4 +58,23 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query("SELECT COUNT(c) FROM Course c WHERE c.department.name = :departmentName")
     long countByDepartment(@Param("departmentName") String departmentName);
+    @Query("SELECT c FROM Course c WHERE c.department.id = :departmentId AND c.semester = :semester AND c.academicYear = :academicYear")
+    List<Course> findCoursesByDepartmentAndSemesterAndYear(
+            @Param("departmentId") Long departmentId,
+            @Param("semester") Semester semester,
+            @Param("academicYear") Integer academicYear);
+
+    @Query("SELECT c FROM Course c WHERE c.department.id = :departmentId AND c.academicYear = :academicYear")
+    List<Course> findCoursesByDepartmentAndAcademicYear(
+            @Param("departmentId") Long departmentId,
+            @Param("academicYear") Integer academicYear);
+
+    @Query("SELECT c FROM Course c WHERE c.faculty = :faculty AND c.semester = :semester AND c.academicYear = :academicYear")
+    List<Course> findCoursesByFacultyAndSemesterAndYear(
+            @Param("faculty") String faculty,
+            @Param("semester") Semester semester,
+            @Param("academicYear") Integer academicYear);
+
+    @Query("SELECT c FROM Course c WHERE c.courseCode IN :courseCodes")
+    List<Course> findCoursesByCourseCodes(@Param("courseCodes") List<String> courseCodes);
 }

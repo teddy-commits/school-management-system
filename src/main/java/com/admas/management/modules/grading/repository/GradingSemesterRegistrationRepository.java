@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface SemesterRegistrationRepository extends JpaRepository<SemesterRegistration, Long> {
+public interface GradingSemesterRegistrationRepository extends JpaRepository<SemesterRegistration, Long> {
 
     Optional<SemesterRegistration> findByStudentIdAndSemesterAndAcademicYear(
             Long studentId, String semester, Integer academicYear);

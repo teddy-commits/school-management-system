@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface CourseEnrollmentRepository extends JpaRepository<CourseEnrollment, Long> {
+public interface GradingCourseEnrollmentRepository extends JpaRepository<CourseEnrollment, Long> {
 
     @Query("SELECT ce FROM CourseEnrollment ce WHERE ce.semesterRegistration.student.id = :studentId AND ce.semesterRegistration.semester = :semester AND ce.semesterRegistration.academicYear = :academicYear")
     List<CourseEnrollment> findByStudentAndSemesterAndAcademicYear(

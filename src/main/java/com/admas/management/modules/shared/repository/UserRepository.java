@@ -48,7 +48,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.role IN :roles AND u.department = :department")
     List<User> findFacultyByDepartment(@Param("roles") List<Role> roles, @Param("department") String department);
+    @Query("SELECT u FROM User u WHERE u.department.id = :departmentId AND u.role = 'STUDENT'")
+    List<User> findStudentsByDepartmentId(@Param("departmentId") Long departmentId);
 
+    @Query("SELECT u FROM User u WHERE u.department.id = :departmentId AND u.academicYearLevel = :yearLevel AND u.role = 'STUDENT'")
+    List<User> findStudentsByDepartmentAndYearLevel(@Param("departmentId") Long departmentId, @Param("yearLevel") Integer yearLevel);
     long countByRole(Role role);
     long countByIsActiveTrue();
 
