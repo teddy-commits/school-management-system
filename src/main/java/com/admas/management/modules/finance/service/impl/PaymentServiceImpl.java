@@ -10,6 +10,8 @@ import com.admas.management.modules.finance.model.enums.PaymentStatus;
 import com.admas.management.modules.finance.repository.FeeRepository;
 import com.admas.management.modules.finance.repository.PaymentRepository;
 import com.admas.management.modules.finance.service.PaymentService;
+import com.admas.management.modules.registration.model.SemesterRegistration;
+import com.admas.management.modules.registration.repository.SemesterRegistrationRepository;
 import com.admas.management.modules.shared.model.User;
 import com.admas.management.modules.shared.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +20,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,18 +35,51 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final FeeRepository feeRepository;
     private final UserRepository userRepository;
+    private final SemesterRegistrationRepository semesterRegistrationRepository;
 
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT','MANAGEMENT', 'FINANCE_MANAGER')")
+    @Transactional
     public PaymentResponseDTO processPayment(PaymentRequestDTO request, String receivedBy) {
 
         User student = userRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + request.getStudentId()));
+
+        String semester = request.getSemester();
+        Integer academicYear = request.getAcademicYear();
+
+        if (semester != null && academicYear != null) {
+            boolean existingPayment = paymentRepository.existsByStudentIdAndSemesterAndAcademicYearAndStatus(
+                    request.getStudentId(), semester, academicYear, PaymentStatus.PAID
+            );
+
+            if (existingPayment) {
+                throw new RuntimeException("Payment already processed for " + semester + " " + academicYear + ". Duplicate payment not allowed.");
+            }
+            List<Payment> existingPayments = paymentRepository.findByStudentIdAndSemesterAndAcademicYear(
+                    request.getStudentId(), semester, academicYear
+            );
+
+            for (Payment p : existingPayments) {
+                if (p.getStatus() == PaymentStatus.PAID) {
+                    throw new RuntimeException("A successful payment already exists for " + semester + " " + academicYear);
+                }
+            }
+        }
 
         Fee fee = null;
         if (request.getFeeId() != null) {
             fee = feeRepository.findById(request.getFeeId())
-                    .orElseThrow(() -> new RuntimeException("Fee not found"));
+                    .orElseThrow(() -> new RuntimeException("Fee not found with ID: " + request.getFeeId()));
+
+            if (fee.getDueAmount() <= 0) {
+                throw new RuntimeException("This fee has already been fully paid. Due amount: " + fee.getDueAmount());
+            }
+
+            if (request.getAmount() > fee.getDueAmount()) {
+                throw new RuntimeException("Payment amount (" + request.getAmount() +
+                        ") exceeds due amount (" + fee.getDueAmount() + ")");
+            }
         }
 
         Payment payment = new Payment();
@@ -54,7 +88,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setFee(fee);
         payment.setAmount(request.getAmount());
         payment.setPaymentMethod(request.getPaymentMethod());
-        payment.setStatus(PaymentStatus.PAID);
+        payment.setStatus(PaymentStatus.PAID);  // Using enum value
         payment.setReferenceNumber(request.getReferenceNumber());
         payment.setBankName(request.getBankName());
         payment.setChequeNumber(request.getChequeNumber());
@@ -64,15 +98,59 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPaymentDate(request.getPaymentDate() != null ? request.getPaymentDate() : LocalDateTime.now());
         payment.setReceiptNumber(generateReceiptNumber());
 
+        if (semester != null) {
+            payment.setSemester(semester);
+        }
+        if (academicYear != null) {
+            payment.setAcademicYear(academicYear);
+        }
+
         Payment savedPayment = paymentRepository.save(payment);
+
         if (fee != null) {
             fee.setPaidAmount(fee.getPaidAmount() + request.getAmount());
             fee.calculateDueAmount();
+
+            if (fee.getDueAmount() <= 0) {
+                fee.setStatus(PaymentStatus.PAID);
+            } else if (fee.getPaidAmount() > 0) {
+                fee.setStatus(PaymentStatus.PARTIAL);
+            }
+
             feeRepository.save(fee);
         }
 
+        updateSemesterRegistrationStatus(student, semester, academicYear);
+
         return mapToResponseDTO(savedPayment, "Payment processed successfully");
     }
+
+    private void updateSemesterRegistrationStatus(User student, String semester, Integer academicYear) {
+        if (semester == null || academicYear == null) {
+            return;
+        }
+
+        try {
+            Optional<SemesterRegistration> registration = semesterRegistrationRepository
+                    .findByStudentAndSemesterAndAcademicYear(student, semester, academicYear);
+
+            if (registration.isPresent()) {
+                SemesterRegistration reg = registration.get();
+                reg.setStatus(SemesterRegistration.RegistrationStatus.PAID);
+
+                BigDecimal totalPaid = paymentRepository.getTotalPaidForStudentSemester(
+                        student.getId(), semester, academicYear, PaymentStatus.PAID
+                );
+                reg.setFeesPaid(totalPaid != null ? totalPaid.doubleValue() : 0.0);
+                reg.calculateTotals();
+
+                semesterRegistrationRepository.save(reg);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to update semester registration status: {}", e.getMessage());
+        }
+    }
+
 
     @Override
     public PaymentResponseDTO processPartialPayment(PaymentRequestDTO request, String receivedBy) {

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,4 +28,28 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("SELECT p.paymentMethod, SUM(p.amount) FROM Payment p GROUP BY p.paymentMethod")
     List<Object[]> getPaymentMethodSummary();
+
+    // FIXED: Use enum parameter instead of String
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Payment p WHERE p.student.id = :studentId AND p.semester = :semester AND p.academicYear = :academicYear AND p.status = :status")
+    boolean existsByStudentIdAndSemesterAndAcademicYearAndStatus(
+            @Param("studentId") Long studentId,
+            @Param("semester") String semester,
+            @Param("academicYear") Integer academicYear,
+            @Param("status") PaymentStatus status  // This is now enum, not String
+    );
+
+    @Query("SELECT p FROM Payment p WHERE p.student.id = :studentId AND p.semester = :semester AND p.academicYear = :academicYear")
+    List<Payment> findByStudentIdAndSemesterAndAcademicYear(
+            @Param("studentId") Long studentId,
+            @Param("semester") String semester,
+            @Param("academicYear") Integer academicYear
+    );
+    // Alternative: Use named parameter with enum
+    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Payment p WHERE p.student.id = :studentId AND p.semester = :semester AND p.academicYear = :academicYear AND p.status = :status")
+    BigDecimal getTotalPaidForStudentSemester(
+            @Param("studentId") Long studentId,
+            @Param("semester") String semester,
+            @Param("academicYear") Integer academicYear,
+            @Param("status") PaymentStatus status
+    );
 }

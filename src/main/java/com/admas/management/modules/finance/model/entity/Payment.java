@@ -50,7 +50,9 @@ public class Payment {
     private String receiptNumber;
     private String receivedBy;
     private String remarks;
-
+    // Add to Payment.java
+    private String semester;
+    private Integer academicYear;
     private LocalDateTime paymentDate;
 
     @CreatedDate

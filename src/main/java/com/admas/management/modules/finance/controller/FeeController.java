@@ -33,13 +33,13 @@ public class FeeController {
     }
 
     @GetMapping("/fee-structures")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT','STUDENT', 'FINANCE_MANAGER')")
     public ResponseEntity<List<FeeResponseDTO>> getAllFeeStructures() {
         return ResponseEntity.ok(feeService.getAllFeeStructures());
     }
 
     @PostMapping("/students/{studentId}/fees")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'FINANCE_MANAGER', 'STUDENT')")
     public ResponseEntity<FeeResponseDTO> generateStudentFee(
             @PathVariable Long studentId,
             @RequestParam Long feeStructureId,

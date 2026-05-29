@@ -40,4 +40,7 @@ public class PaymentRequestDTO {
     private String remarks;
 
     private LocalDateTime paymentDate;
+    // Add these fields to PaymentRequestDTO
+    private String semester;
+    private Integer academicYear;
 }
